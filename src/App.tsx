@@ -83,15 +83,19 @@ type TileProps = {
   index: number
   rowIndex: number
   onClick: () => void
+  current: boolean
 }
 
-function Tile({ kanji: { char, on }, index, rowIndex, onClick }: TileProps) {
+function Tile({ kanji: { char, on }, index, rowIndex, onClick, current }: TileProps) {
   const theme = useTheme()
   return (
     <div className='w-12 inline-flex flex-col align-middle m-[2px] cursor-pointer font-[KanjiChart]'>
       <div
         className="h-12 flex border-2 border-gray-400 rounded-lg text-[42px] justify-center items-center transition duration-300 hover:shadow-[0_0_8px_rgba(0,0,0,0.6)]"
-        style={index % 2 == rowIndex % 2 ? theme.accent : undefined}
+        style={{
+          ...(index % 2 == rowIndex % 2 ? theme.accent : undefined),
+          borderColor: current ? theme.highlight.backgroundColor : colors.gray["400"]
+        }}
         onClick={onClick}
       >
         {char}
@@ -101,14 +105,22 @@ function Tile({ kanji: { char, on }, index, rowIndex, onClick }: TileProps) {
   )
 }
 
-function Content({level, setKanji}: {level: Level; setKanji: (k: Kanji) => void}) {
+function Content({level, setKanji, currentKanji}: {level: Level; setKanji: (k: Kanji) => void, currentKanji?: string}) {
   const ROW_LENGTH = 28
   const rows = []
   const data = jlpt[level]
   for (let i = 0; i < data.length; i += ROW_LENGTH) {
     rows.push(
       <div>
-        {data.slice(i, i+ROW_LENGTH).map((k, j) => <Tile kanji={k} rowIndex={i / ROW_LENGTH} index={j} onClick={() => setKanji(k)}/>)}
+        {data.slice(i, i + ROW_LENGTH).map((k, j) =>
+          <Tile
+            kanji={k}
+            rowIndex={i / ROW_LENGTH}
+            index={j}
+            onClick={() => setKanji(k)}
+            current={k.char == currentKanji}
+          />
+        )}
       </div>
     )
   }
@@ -117,22 +129,7 @@ function Content({level, setKanji}: {level: Level; setKanji: (k: Kanji) => void}
   )
 }
 
-type LevelButtonProps = {
-  onClick: () => void
-  children: any
-}
-
-function LevelButton({ onClick, children }: LevelButtonProps) {
-  return (
-    <button
-      className='border rounded m-1 p-2 bg-slate-500'
-      onClick={onClick}>
-        {children}
-      </button>
-  )
-}
-
-function Bar({ compound }: {compound: Compound}) {
+function KanjiCompound({ compound }: {compound: Compound}) {
   const theme = useTheme()
   return (
     <div className='text-lg'>
@@ -144,26 +141,32 @@ function Bar({ compound }: {compound: Compound}) {
   )
 }
 
-function Foo({ kanji }: { kanji: Kanji }) {
+function KanjiCard({ kanji }: { kanji: Kanji }) {
   const theme = useTheme()
   return (
     <div className='px-4'>
       <div className='text-xl m-1'>{kanji.meaning}</div>
       <div className='text-8xl text-center font-[KanjiChart]'  style={theme.accent}>{kanji.char}</div>
-      <div className='my-3 border-2 rounded p-1' style={{...theme.accent, borderColor: theme.highlight.backgroundColor}}>
+      <div className="my-2">
+        <div>{kanji.on}</div>
+        <div>{kanji.kun}</div>
+      </div>
+      <div className='border-2 rounded p-1' style={{...theme.accent, borderColor: theme.highlight.backgroundColor}}>
         <div className='text-xs font-bold'>Compounds</div>
-        {kanji.compound.map(c => <Bar compound={c}/>)}
+        {kanji.compound.map(c => <KanjiCompound compound={c}/>)}
       </div>
     </div>
   )
 }
 
-function LevelButton2({ variant, onClick, children, checked }: { variant: 'left' | 'right' | 'normal', onClick: () => void, children: any, checked: boolean }) {
+function LevelButton({ variant, onClick, children, checked }: { variant: 'left' | 'right' | 'normal', onClick: () => void, children: any, checked: boolean }) {
+  const borderRadius = variant == 'left' ? 'rounded-s-md' : variant == 'right' ? 'rounded-e-md' : ''
   return (
     <button
-      className={'outline outline-1 outline-gray-400 py-1 px-3 text-gray-700 font-bold text-sm hover:bg-gray-400' + ' ' + (
-        variant == 'left' ? 'rounded-s-md' : variant == 'right' ? 'rounded-e-md' : ''
-      ) + ' ' + (checked ? 'bg-gray-300' : 'bg-gray-100' )}
+      className={`outline outline-1 outline-gray-400 py-1 px-3 text-gray-700 font-bold text-sm hover:bg-gray-400 ${borderRadius}`}
+      style={{
+        backgroundColor: checked ? colors.gray["300"] : colors.gray["100"]
+      }}
       onClick={onClick}>
         {children}
       </button>
@@ -179,27 +182,27 @@ function App() {
     <ThemeProvider theme={theme}>
       <div className='flex h-screen' style={theme.surface}>
         <div className='w-[230px] h-screen'>
-            <div className='text-center text-sm m-1'>level</div>
-            <div className='flex justify-center flex-nowrap'>
-              {allLevels.map((name, i) => (
-                <LevelButton2 checked={name == level} onClick={() => {
-                  setLevel(name)
-                  setKanji(jlpt[name][0])
-                }} variant={i == 0 ? 'left' : i == allLevels.length - 1 ? 'right' : 'normal'}>
-                  {name}
-                </LevelButton2>
-              ))}
+          <div className='text-center text-sm m-1'>level</div>
+          <div className='flex justify-center flex-nowrap'>
+            {allLevels.map((name, i) => (
+              <LevelButton checked={name == level} onClick={() => {
+                setLevel(name)
+                setKanji(jlpt[name][0])
+              }} variant={i == 0 ? 'left' : i == allLevels.length - 1 ? 'right' : 'normal'}>
+                {name}
+              </LevelButton>
+            ))}
           </div>
         </div>
         <div className='w-full flex flex-col'>
           <div className='overflow-scroll flex-1 min-h-0' style={theme.surface}>
             <h1 className='text-xl font-bold my-3'>JLPT Level {level} Kanji List</h1>
             <div>This kanji list is derived from the pre-2010 Test Content Specification. As of 2010, there is no official kanji list.</div>
-            <Content level={level} setKanji={setKanji} />
+            <Content level={level} setKanji={setKanji} currentKanji={kanji?.char} />
           </div>
           { kanji
             ? <div className='flex-1' style={theme.surface}>
-                <Foo kanji={kanji} />
+                <KanjiCard kanji={kanji} />
               </div>
             : null
           }
