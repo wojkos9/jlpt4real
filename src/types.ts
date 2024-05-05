@@ -16,7 +16,7 @@ type Kanji = {
 }
 
 declare module 'kuroshiro' {
-  type System = "nippon" | "passport" | "hepburn" | "hepburn"
+  export type System = "nippon" | "passport" | "hepburn"
   interface Util {
     kanaToRomaji: (kana: string, system: System) => string
   }

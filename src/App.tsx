@@ -113,7 +113,7 @@ function ListScreen({ setTheme }: { setTheme: (x: typeof themes["N5"]) => void }
               </LevelButton>
             ))}
           </div>
-          <div className='flex justify-center '>
+          <div className='flex justify-center'>
             <QuizButton active={isQuiz} onClick={() => setIsQuiz(!isQuiz)} />
           </div>
         </div>
@@ -139,7 +139,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       {/* <ListScreen setTheme={setTheme} /> */}
-      <QuizScreen kanjiRange={jlpt.N5}/>
+      <QuizScreen kanjiRange={jlpt.N4}/>
     </ThemeProvider>
   )
 }
