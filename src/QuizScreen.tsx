@@ -17,6 +17,7 @@ interface QuizRowProps {
   kanji: Kanji
   onClick: () => void
   solved: boolean
+  active: boolean
 }
 
 
@@ -28,10 +29,17 @@ function allRom(k: Kanji, system?: System) {
   return k.on.map(o => unique(rom(o, system))).reduce((x, y) => x.concat(y))
 }
 
-function QuizRow({ kanji: k, onClick, solved }: QuizRowProps) {
+function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
   const roms = allRom(k, "hepburn")
+  const theme = useTheme()
+  const activeStyle: React.CSSProperties = {
+    outlineColor: theme.accent,
+    outlineWidth: 4,
+    outlineStyle: 'solid'
+  }
   return (
-    <div className='flex border border-gray-200 w-32 text-sm hover:bg-gray-400 cursor-pointer select-none' onClick={onClick}>
+    <div className='flex border border-gray-200 w-32 text-sm hover:bg-gray-400 cursor-pointer select-none' onClick={onClick}
+    style={active ? activeStyle : undefined}>
       <div className='border-e border-gray-200 p-1 font-[KanjiChart]'>{k.char}</div>
       {solved && <div className='p-1 line-clamp-1'>{roms.join("/")}</div>}
     </div>
@@ -115,7 +123,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   return (
     <div
       className='h-screen flex flex-col items-center gap-4'
-      style={theme.surface}
+      style={{backgroundColor: theme.surface}}
     >
       <div className='flex items-center h-min gap-4'>
         <Tile kanji={kanji} />
@@ -134,7 +142,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
           className='border-2 border-gray-400 rounded text-lg bg-transparent focus:outline-none text-center w-20 h-10'
           type="text"
           autoFocus
-          style={{borderColor: theme.highlight.backgroundColor}}
+          style={{borderColor: theme.highlight}}
           onChange={checkInput}
           onKeyDown={checkMod}
           onKeyUp={checkMod}
@@ -144,7 +152,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
       </div>
       <div className='w-full flex flex-col flex-wrap min-h-0'>
         {
-          kanjiRange.map((k, i) => <QuizRow kanji={k} solved={solved[k.char]} onClick={() => {
+          kanjiRange.map((k, i) => <QuizRow kanji={k} active={i == current} solved={solved[k.char]} onClick={() => {
             setCurrent(i)
             inputBox.current!.value = ""
             inputBox.current!.focus()

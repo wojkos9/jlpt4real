@@ -16,8 +16,8 @@ export default function Tile({ kanji, isOdd, onClick, current, showHint }: TileP
       <div
         className="h-12 flex border-2 border-gray-400 rounded-lg text-[42px] justify-center items-center transition duration-300 hover:shadow-[0_0_8px_rgba(0,0,0,0.6)]"
         style={{
-          ...(isOdd ? theme.accent : undefined),
-          borderColor: current ? theme.highlight.backgroundColor : colors.gray["400"]
+          backgroundColor: (isOdd ? theme.accent : undefined),
+          borderColor: current ? theme.highlight : colors.gray["400"]
         }}
         onClick={onClick}
       >
