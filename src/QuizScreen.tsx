@@ -71,26 +71,31 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   const [current, setCurrent] = useState(0)
   const [solved, setSolved] = useState<{[x: string]: boolean}>({})
   const [hint, setHint] = useState(false)
+  const [kanjis, setKanjis] = useState(kanjiRange)
   const theme = useTheme()
   const inputBox = useRef<HTMLInputElement>(null)
 
-  const kanji = kanjiRange[current]
+  const kanji = kanjis[current]
 
   function rot1(i: number, dir: 1 | -1) {
-    return (i + dir + kanjiRange.length) % kanjiRange.length
+    return (i + dir + kanjis.length) % kanjis.length
+  }
+
+  function findKanji(start: number, dir: 1 | -1 = 1) {
+    for (let i = rot1(start, dir); i != start; i = rot1(i, dir)) {
+      if (!solved[kanjis[i].char]) {
+        return i
+      }
+    }
+    return start
   }
 
   function nextKanji(skip: boolean = false, dir: 1 | -1 = 1) {
-    if (current < kanjiRange.length) {
+    if (current < kanjis.length) {
       if (!skip) {
         setSolved({...solved, [kanji.char]: true})
       }
-      for (let i = rot1(current, dir); i != current; i = rot1(i, dir)) {
-        if (!solved[kanjiRange[i].char]) {
-          setCurrent(i)
-          break
-        }
-      }
+      setCurrent(findKanji(current, dir))
     }
   }
 
@@ -103,6 +108,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   }
 
   function checkMod(e: KeyboardEvent<HTMLInputElement>) {
+    console.log(e)
     if (e.key == "Tab" && e.type == "keydown") {
       e.preventDefault()
       if (e.shiftKey) {
@@ -110,9 +116,14 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
       } else {
         nextKanji(true, 1)
       }
-    } else if (e.key == " ") {
+    } else if (e.key == "Shift") {
       e.preventDefault()
       setHint(e.type == "keydown")
+      setSolved({...solved, [kanji.char]: false})
+    } else if (e.key == "ArrowDown" && e.type == "keydown") {
+      setCurrent(current == kanjis.length - 1 ? 0 : current + 1)
+    } else if (e.key == "ArrowUp" && e.type == "keydown") {
+      setCurrent(current == 0 ? kanjis.length - 1 : current - 1)
     }
   }
 
@@ -120,11 +131,14 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
     `${kanji.meaning} (${kanji.on.join(", ")})`
   , [kanji])
 
-  return (
-    <div
-      className='h-screen flex flex-col items-center gap-4'
-      style={{backgroundColor: theme.surface}}
-    >
+  function shuffle() {
+    setKanjis(Array.from(kanjis).sort(() => Math.random() - 0.5))
+  }
+  useEffect(() => setCurrent(findKanji(-1)), [kanjis])
+  useEffect(() => setKanjis(kanjiRange), [kanjiRange])
+
+  function QuizArea() {
+    return (
       <div className='flex items-center h-min gap-4'>
         <Tile kanji={kanji} />
         {hint && hintText}
@@ -149,11 +163,22 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
           ref={inputBox}
         />
         </form>
+        <button className='bg-gray-500' onClick={shuffle}>Random</button>
       </div>
+    )
+  }
+
+  return (
+    <div
+      className='h-screen flex flex-col items-center gap-4'
+      style={{backgroundColor: theme.surface}}
+    >
+      <QuizArea />
       <div className='w-full flex flex-col flex-wrap min-h-0'>
         {
-          kanjiRange.map((k, i) => <QuizRow kanji={k} active={i == current} solved={solved[k.char]} onClick={() => {
+          kanjis.map((k, i) => <QuizRow kanji={k} active={i == current} solved={solved[k.char]} onClick={() => {
             setCurrent(i)
+            setSolved({...solved, [k.char]: false})
             inputBox.current!.value = ""
             inputBox.current!.focus()
           }} />)
