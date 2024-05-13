@@ -2,6 +2,7 @@ import Kuroshiro, { System } from 'kuroshiro'
 import { useState, useRef, ChangeEvent, KeyboardEvent, useEffect, useMemo } from 'react'
 import Tile from './Tile'
 import { useTheme } from './theme'
+import { AutoSuggestion } from './AutoSuggestion'
 
 
 function rom(x: string, system?: System) {
@@ -57,37 +58,103 @@ function yomiMatches(a: string, b: string) {
   return a == b
 }
 
-function checkAnswer(k: Kanji, ans: string): CheckResult {
-  const roms = allRom(k)
-  if (!roms.some(r => yomiMatches(ans, r))) {
+function checkAnswer(valids: string[], ans: string): CheckResult {
+  if (!valids.some(r => yomiMatches(ans, r))) {
     return CheckResult.INCORRECT
-  } else if (roms.some(r => !yomiMatches(ans, r) && r.startsWith(ans))) {
+  } else if (valids.some(r => !yomiMatches(ans, r) && r.startsWith(ans))) {
     return CheckResult.CORRECT_MANY
   }
   return CheckResult.CORRECT_ONE
 }
 
+interface InputData {
+  options: string[]
+  width: React.CSSProperties["width"]
+  autosuggestion?: boolean
+}
+
+interface InputsProps {
+  data: InputData[]
+  onComplete: () => void
+}
+
+function rotArray<T>(array: T[], predicate: (t: T) => boolean, start: number, dir: 1 | -1 = 1) {
+  function rot1(i: number) {
+    return (i + dir + array.length) % array.length
+  }
+
+  for (let i = rot1(start); i != start; i = rot1(i)) {
+    if (predicate(array[i])) {
+      return i
+    }
+  }
+  return start
+}
+
+function Inputs({ data, onComplete }: InputsProps) {
+  const theme = useTheme()
+  const refs = data.map(() => useRef<HTMLInputElement>(null))
+  const [completed, setCompleted] = useState(data.map(() => false))
+
+  useEffect(() => {
+    if (completed.every(x => x)) {
+      onComplete()
+    }
+  }, [completed])
+
+  useEffect(() => {
+    refs[0].current!.focus()
+  }, [])
+
+  function nextUncompleted(index: number) {
+    return rotArray(data.map((_, i) => i), i => !completed[i], index)
+  }
+
+  function checkInput(index: number, options: string[], e: ChangeEvent<HTMLInputElement>) {
+    const answer = e.target.value
+    if (checkAnswer(options, answer) == CheckResult.CORRECT_ONE) {
+      // e.target.value = ""
+      if (completed.some(x => !x)) {
+        setCompleted([...completed.slice(0, index), true, ...completed.slice(index+1)])
+        refs[nextUncompleted(index)].current!.focus()
+      } else {
+        onComplete()
+      }
+    }
+  }
+
+  return (
+    <div>
+      { data.map((d, i) => {
+        const onChange = (e: ChangeEvent<HTMLInputElement>) => checkInput(i, d.options, e)
+        return d.autosuggestion ?
+          <AutoSuggestion words={d.options} onChange={onChange} minChars={2} aRef={refs[i]} />
+          :
+          <input
+            className='border-2 m-1 border-gray-400 rounded text-lg bg-transparent focus:outline-none text-center w-16 h-10'
+            type="text"
+            key={i}
+            readOnly={completed[i]}
+            style={{borderColor: completed[i] ? "red" : theme.highlight, width: d.width}}
+            onChange={onChange}
+            ref={refs[i]}
+          />
+      }) }
+    </div>
+  )
+}
+
 export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   const [current, setCurrent] = useState(0)
   const [solved, setSolved] = useState<{[x: string]: boolean}>({})
-  const [hint, setHint] = useState(false)
   const [kanjis, setKanjis] = useState(kanjiRange)
   const theme = useTheme()
-  const inputBox = useRef<HTMLInputElement>(null)
+  const input1 = useRef<HTMLInputElement>(null)
 
   const kanji = kanjis[current]
 
-  function rot1(i: number, dir: 1 | -1) {
-    return (i + dir + kanjis.length) % kanjis.length
-  }
-
   function findKanji(start: number, dir: 1 | -1 = 1) {
-    for (let i = rot1(start, dir); i != start; i = rot1(i, dir)) {
-      if (!solved[kanjis[i].char]) {
-        return i
-      }
-    }
-    return start
+    return rotArray(kanjis, k => !solved[k.char], start, dir)
   }
 
   function nextKanji(skip: boolean = false, dir: 1 | -1 = 1) {
@@ -99,34 +166,6 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
     }
   }
 
-  function checkInput(e: ChangeEvent<HTMLInputElement>) {
-    const answer = e.target.value
-    if (checkAnswer(kanji, answer) == CheckResult.CORRECT_ONE) {
-      nextKanji()
-      e.target.value = ""
-    }
-  }
-
-  function checkMod(e: KeyboardEvent<HTMLInputElement>) {
-    console.log(e)
-    if (e.key == "Tab" && e.type == "keydown") {
-      e.preventDefault()
-      if (e.shiftKey) {
-        nextKanji(true, -1)
-      } else {
-        nextKanji(true, 1)
-      }
-    } else if (e.key == "Shift") {
-      e.preventDefault()
-      setHint(e.type == "keydown")
-      setSolved({...solved, [kanji.char]: false})
-    } else if (e.key == "ArrowDown" && e.type == "keydown") {
-      setCurrent(current == kanjis.length - 1 ? 0 : current + 1)
-    } else if (e.key == "ArrowUp" && e.type == "keydown") {
-      setCurrent(current == 0 ? kanjis.length - 1 : current - 1)
-    }
-  }
-
   let hintText: string = useMemo(() =>
     `${kanji.meaning} (${kanji.on.join(", ")})`
   , [kanji])
@@ -134,35 +173,39 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   function shuffle() {
     setKanjis(Array.from(kanjis).sort(() => Math.random() - 0.5))
   }
-  useEffect(() => setCurrent(findKanji(-1)), [kanjis])
+  useEffect(() => setCurrent(0), [kanjis])
   useEffect(() => setKanjis(kanjiRange), [kanjiRange])
 
   function QuizArea() {
+    const [hint, setHint] = useState(false)
+    const data: InputData[] = [
+      { options: allRom(kanji), width: "4rem" },
+      { options: kanji.meaning, width: "8rem", autosuggestion: true }
+    ]
+
+    function checkMod(e: KeyboardEvent<HTMLInputElement>) {
+      console.log(e)
+      if (e.key == "Tab" && e.type == "keydown") {
+        e.preventDefault()
+      } else if (e.key == "Alt") {
+        e.preventDefault()
+        setHint(e.type == "keydown")
+      } else if (e.key == "Delete") {
+        setSolved({...solved, [kanji.char]: false})
+      } else if (e.key == "ArrowDown" && e.type == "keydown") {
+        setCurrent(current == kanjis.length - 1 ? 0 : current + 1)
+      } else if (e.key == "ArrowUp" && e.type == "keydown") {
+        setCurrent(current == 0 ? kanjis.length - 1 : current - 1)
+      }
+    }
+
     return (
       <div className='flex items-center h-min gap-4'>
         <Tile kanji={kanji} />
         {hint && hintText}
-        <form onSubmit={e => {
-          e.preventDefault()
-          const ans = inputBox.current?.value!
-          if (ans == "") {
-            nextKanji(true)
-          } else if (checkAnswer(kanji, ans)  != CheckResult.INCORRECT) {
-            nextKanji()
-            inputBox.current!.value = ""
-          }
-        }}>
-        <input
-          className='border-2 border-gray-400 rounded text-lg bg-transparent focus:outline-none text-center w-20 h-10'
-          type="text"
-          autoFocus
-          style={{borderColor: theme.highlight}}
-          onChange={checkInput}
-          onKeyDown={checkMod}
-          onKeyUp={checkMod}
-          ref={inputBox}
-        />
-        </form>
+        <div onKeyDown={checkMod} onKeyUp={checkMod}>
+          <Inputs data={data} onComplete={nextKanji} />
+        </div>
         <button className='bg-gray-500' onClick={shuffle}>Random</button>
       </div>
     )
@@ -179,8 +222,8 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
           kanjis.map((k, i) => <QuizRow kanji={k} active={i == current} solved={solved[k.char]} onClick={() => {
             setCurrent(i)
             setSolved({...solved, [k.char]: false})
-            inputBox.current!.value = ""
-            inputBox.current!.focus()
+            input1.current!.value = ""
+            input1.current!.focus()
           }} />)
         }
       </div>

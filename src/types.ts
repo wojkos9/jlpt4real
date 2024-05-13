@@ -11,7 +11,7 @@ type Kanji = {
   char: string
   kun: string[]
   on: string[]
-  meaning: string
+  meaning: string[]
   compound: Compound[]
 }
 
