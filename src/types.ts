@@ -25,3 +25,7 @@ declare module 'kuroshiro' {
   }
   export default Kuroshiro
 }
+
+declare module 'assets/trans.json' {
+  export default null;
+}

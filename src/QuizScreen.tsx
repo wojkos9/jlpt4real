@@ -3,6 +3,7 @@ import { useState, useRef, ChangeEvent, KeyboardEvent, useEffect, useMemo } from
 import Tile from './Tile'
 import { useTheme } from './theme'
 import { AutoSuggestion } from './AutoSuggestion'
+import trans from './assets/trans.json'
 
 
 function rom(x: string, system?: System) {
@@ -152,6 +153,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   const input1 = useRef<HTMLInputElement>(null)
 
   const kanji = kanjis[current]
+  kanji.meaning = trans[kanji.char as keyof typeof trans].slice(0, 4)
 
   function findKanji(start: number, dir: 1 | -1 = 1) {
     return rotArray(kanjis, k => !solved[k.char], start, dir)
@@ -175,9 +177,10 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   }
   useEffect(() => setCurrent(0), [kanjis])
   useEffect(() => setKanjis(kanjiRange), [kanjiRange])
+  const [hint, setHint] = useState(false)
 
   function QuizArea() {
-    const [hint, setHint] = useState(false)
+
     const data: InputData[] = [
       { options: allRom(kanji), width: "4rem" },
       { options: kanji.meaning, width: "8rem", autosuggestion: true }
@@ -206,6 +209,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
         <div onKeyDown={checkMod} onKeyUp={checkMod}>
           <Inputs data={data} onComplete={nextKanji} />
         </div>
+        <input key="check" type="checkbox" onChange={e => setHint(e.target.checked) } />
         <button className='bg-gray-500' onClick={shuffle}>Random</button>
       </div>
     )
