@@ -3,7 +3,8 @@ import { useState, useRef, ChangeEvent, KeyboardEvent, useEffect, useMemo } from
 import Tile from './Tile'
 import { useTheme } from './theme'
 import { AutoSuggestion } from './AutoSuggestion'
-import trans from './assets/trans.json'
+import meaning from './assets/kanji_meaning.json'
+import KanjiCard from './KanjiCard'
 
 
 function rom(x: string, system?: System) {
@@ -27,23 +28,22 @@ function unique<T>(x: T[]): T[] {
   return Array.from(new Set(x))
 }
 
-function allRom(k: Kanji, system?: System) {
-  return k.on.map(o => unique(rom(o, system))).reduce((x, y) => x.concat(y))
+function allRom(readings: string[], system?: System) {
+  return readings.map(o => unique(rom(o, system))).reduce((x, y) => x.concat(y))
 }
 
 function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
-  const roms = allRom(k, "hepburn")
+  const roms = allRom(getOn(k), "hepburn")
   const theme = useTheme()
   const activeStyle: React.CSSProperties = {
-    outlineColor: theme.accent,
-    outlineWidth: 4,
-    outlineStyle: 'solid'
+    borderColor: theme.highlight
   }
   return (
-    <div className='flex border border-gray-200 w-32 text-sm hover:bg-gray-400 cursor-pointer select-none' onClick={onClick}
+    <div className='flex border-2 border-gray-400 rounded m-px w-60 text-xl hover:bg-gray-400 cursor-pointer select-none flex' onClick={onClick}
     style={active ? activeStyle : undefined}>
-      <div className='border-e border-gray-200 p-1 font-[KanjiChart]'>{k.char}</div>
-      {solved && <div className='p-1 line-clamp-1'>{roms.join("/")}</div>}
+      <div className='border-e-2 border-gray-400 p-1 font-[KanjiChart]'>{k.char}</div>
+      {solved && <div className='p-1 line-clamp-1 border-gray-400 border-e-2 w-20'>{roms[0]}</div>}
+      {solved && <div className='p-1 flex-1'>{getMeaning(k)[0]}</div>}
     </div>
   )
 }
@@ -145,6 +145,14 @@ function Inputs({ data, onComplete }: InputsProps) {
   )
 }
 
+function getMeaning(k: Kanji) {
+  return [meaning[k.char as any as keyof typeof meaning]]
+}
+
+function getOn(k: Kanji) {
+  return k.on.slice(0, 1)
+}
+
 export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   const [current, setCurrent] = useState(0)
   const [solved, setSolved] = useState<{[x: string]: boolean}>({})
@@ -153,7 +161,6 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   const input1 = useRef<HTMLInputElement>(null)
 
   const kanji = kanjis[current]
-  kanji.meaning = trans[kanji.char as keyof typeof trans].slice(0, 4)
 
   function findKanji(start: number, dir: 1 | -1 = 1) {
     return rotArray(kanjis, k => !solved[k.char], start, dir)
@@ -169,7 +176,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   }
 
   let hintText: string = useMemo(() =>
-    `${kanji.meaning} (${kanji.on.join(", ")})`
+    `${getMeaning(kanji)} (${getOn(kanji).join(", ")})`
   , [kanji])
 
   function shuffle() {
@@ -178,12 +185,13 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   useEffect(() => setCurrent(0), [kanjis])
   useEffect(() => setKanjis(kanjiRange), [kanjiRange])
   const [hint, setHint] = useState(false)
+  const [cheat, setCheat] = useState(true)
 
   function QuizArea() {
 
     const data: InputData[] = [
-      { options: allRom(kanji), width: "4rem" },
-      { options: kanji.meaning, width: "8rem", autosuggestion: true }
+      { options: allRom(getOn(kanji)), width: "4rem" },
+      { options: getMeaning(kanji), width: "8rem", autosuggestion: true }
     ]
 
     function checkMod(e: KeyboardEvent<HTMLInputElement>) {
@@ -203,14 +211,18 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
     }
 
     return (
-      <div className='flex items-center h-min gap-4'>
+      <div className='flex items-center gap-4'>
         <Tile kanji={kanji} />
-        {hint && hintText}
         <div onKeyDown={checkMod} onKeyUp={checkMod}>
           <Inputs data={data} onComplete={nextKanji} />
         </div>
-        <input key="check" type="checkbox" onChange={e => setHint(e.target.checked) } />
         <button className='bg-gray-500' onClick={shuffle}>Random</button>
+        <input key="check" id="hint" type="checkbox" onChange={e => setCheat(e.target.checked) } checked={cheat} />
+        <label htmlFor="hint">cheat</label>
+        { hint &&
+          <div className='absolute top-14 rounded-md' style={{backgroundColor: theme.accent}}>
+          <KanjiCard kanji={kanji} onlyMeta />
+        </div> }
       </div>
     )
   }
@@ -223,7 +235,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
       <QuizArea />
       <div className='w-full flex flex-col flex-wrap min-h-0'>
         {
-          kanjis.map((k, i) => <QuizRow kanji={k} active={i == current} solved={solved[k.char]} onClick={() => {
+          kanjis.map((k, i) => <QuizRow kanji={k} active={i == current} solved={solved[k.char] || cheat} onClick={() => {
             setCurrent(i)
             setSolved({...solved, [k.char]: false})
             input1.current!.value = ""

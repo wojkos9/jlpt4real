@@ -13,7 +13,7 @@ export function AutoSuggestion({ onChange, className, words, minChars, aRef, ...
   const theme = useTheme()
 
   function getSuggestion(start: string) {
-    return start.length >= minChars ? words.reduce((p, c) => start && c.startsWith(start) && (!p || c.length < p.length) ? c : p, "") : ""
+    return start.length >= minChars ? words.reduce((p, c) => start && c.toLowerCase().startsWith(start.toLowerCase()) && (!p || c.length < p.length) ? c : p, "") : ""
   }
 
   return (<div
@@ -22,7 +22,11 @@ export function AutoSuggestion({ onChange, className, words, minChars, aRef, ...
     <input
       className={`m-1 relative left-0 bg-transparent outline-none w-full z-10 ${className}`}
       onChange={e => {
-        setSuggestion(getSuggestion(e.target!.value))
+        const s = getSuggestion(e.target!.value)
+        if (s) {
+          (e.target as HTMLInputElement).value = s.substring(0, e.target!.value.length)
+        }
+        setSuggestion(s)
         onChange?.(e)
       }}
       onKeyDown={e => {

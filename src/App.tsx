@@ -3,6 +3,7 @@ import jlpt from './assets/jlpt.json'
 import QuizScreen from './QuizScreen'
 import Tile from './Tile'
 import { useTheme, ThemeProvider, themes, themeNeutral, ThemeSystem, Theme } from './theme'
+import KanjiCard from './KanjiCard'
 
 type ContentProps = {
   level: Level
@@ -31,36 +32,6 @@ function Content({level, setKanji, currentKanji, isQuiz}: ContentProps) {
   }
   return (
     <div className='flex-wrap'>{rows}</div>
-  )
-}
-
-function KanjiCompound({ compound }: {compound: Compound}) {
-  const theme = useTheme()
-  return (
-    <div className='text-lg'>
-      <div className='inline mx-1'>{compound.kanji}</div>
-      <div className='inline mx-1' style={{backgroundColor: theme.highlight}}>{compound.kana}</div>
-      <div className='inline mx-1 align-middle text-base'>{compound.translation}</div>
-      <div className='inline mx-1 align-middle text-xs'>({compound.type})</div>
-    </div>
-  )
-}
-
-function KanjiCard({ kanji }: { kanji: Kanji }) {
-  const theme = useTheme()
-  return (
-    <div className='px-4'>
-      <div className='text-xl m-1'>{kanji.meaning}</div>
-      <div className='text-8xl text-center font-[KanjiChart]'  style={{backgroundColor: theme.accent}}>{kanji.char}</div>
-      <div className="my-2">
-        <div>{kanji.on.join(", ")}</div>
-        <div>{kanji.kun.join(", ")}</div>
-      </div>
-      <div className='border-2 rounded p-1' style={{backgroundColor: theme.accent, borderColor: theme.highlight}}>
-        <div className='text-xs font-bold'>Compounds</div>
-        {kanji.compound.map(c => <KanjiCompound compound={c}/>)}
-      </div>
-    </div>
   )
 }
 
@@ -120,10 +91,13 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
   const ranges: [number, number][] = []
   for (let i = 0; i < kanjiRange.length; i += quizRange) {
     let next = Math.min(i + quizRange, kanjiRange.length)
-    if (kanjiRange.length - next < quizRange / 2) {
-      ranges.push([i, kanjiRange.length])
-      break
-    }
+    // const kanjiLeft = kanjiRange.length - i
+    // if (quizRange < kanjiLeft && kanjiLeft < 2 * quizRange) {
+    //   const halfKanji = Math.floor(kanjiLeft / 2)
+    //   ranges.push([i, i + halfKanji])
+    //   ranges.push([i + halfKanji + 1, kanjiRange.length])
+    //   break
+    // }
     ranges.push([i, next - 1])
   }
   return (
