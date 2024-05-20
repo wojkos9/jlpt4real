@@ -98,7 +98,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
     //   ranges.push([i + halfKanji + 1, kanjiRange.length])
     //   break
     // }
-    ranges.push([i, next - 1])
+    ranges.push([i, next])
   }
   return (
     <div>
@@ -120,7 +120,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
             <QuizRangeButton active={false} onClick={() => setQuiz({
               level: level,
               range: [a, b]
-            })}>{a+1}-{b+1}</QuizRangeButton>
+            })}>{a+1}-{b}</QuizRangeButton>
           )
         }
       </div>

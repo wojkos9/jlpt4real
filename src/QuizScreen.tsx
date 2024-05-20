@@ -6,6 +6,13 @@ import { AutoSuggestion } from './AutoSuggestion'
 import meaning from './assets/kanji_meaning.json'
 import KanjiCard from './KanjiCard'
 
+function splitBy<T>(array: T[], n: number) {
+  const ranges: T[][] = []
+  for (let i = 0; i < array.length; i += n) {
+    ranges.push(array.slice(i, Math.min(i + n, array.length)))
+  }
+  return ranges
+}
 
 function rom(x: string, system?: System) {
   const systems: System[] = system ? [system] : ["nippon", "hepburn"]
@@ -39,11 +46,11 @@ function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
     borderColor: theme.highlight
   }
   return (
-    <div className='flex border-2 border-gray-400 rounded m-px w-60 text-xl hover:bg-gray-400 cursor-pointer select-none flex' onClick={onClick}
+    <div className='flex border-2 border-gray-400 rounded m-px w-60 h-12 text-xl hover:bg-gray-400 cursor-pointer select-none flex' onClick={onClick}
     style={active ? activeStyle : undefined}>
       <div className='border-e-2 border-gray-400 p-1 font-[KanjiChart]'>{k.char}</div>
-      {solved && <div className='p-1 line-clamp-1 border-gray-400 border-e-2 w-20'>{roms[0]}</div>}
-      {solved && <div className='p-1 flex-1'>{getMeaning(k)[0]}</div>}
+      {solved && <div className='p-1 flex items-center line-clamp-1 border-gray-400 border-e-2 w-20'>{roms[0]}</div>}
+      {solved && <div className='p-1 flex items-center text-base flex-1'>{getMeaning(k)[0]}</div>}
     </div>
   )
 }
@@ -227,20 +234,34 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
     )
   }
 
+  function QuizColumn({ kanjiRange }: { kanjiRange: Kanji[] }) {
+    return (
+      <div className='flex flex-col'>
+        {
+          kanjiRange.map((k, i) => (
+            <QuizRow kanji={k} active={k == kanji} solved={solved[k.char] || cheat} onClick={() => {
+              setCurrent(kanjis.indexOf(k))
+              setSolved({ ...solved, [k.char]: false })
+              input1.current!.value = ""
+              input1.current!.focus()
+            }} />
+          ))
+        }
+      </div>
+    )
+  }
+
+
+
   return (
     <div
       className='h-screen flex flex-col items-center gap-4'
       style={{backgroundColor: theme.surface}}
     >
       <QuizArea />
-      <div className='w-full flex flex-col flex-wrap min-h-0'>
+      <div className='w-full flex min-h-0'>
         {
-          kanjis.map((k, i) => <QuizRow kanji={k} active={i == current} solved={solved[k.char] || cheat} onClick={() => {
-            setCurrent(i)
-            setSolved({...solved, [k.char]: false})
-            input1.current!.value = ""
-            input1.current!.focus()
-          }} />)
+          splitBy(kanjis, 16).map(r => <QuizColumn kanjiRange={r} />)
         }
       </div>
     </div>
