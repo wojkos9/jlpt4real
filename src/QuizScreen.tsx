@@ -5,6 +5,7 @@ import { useTheme } from './theme'
 import { AutoSuggestion } from './AutoSuggestion'
 import meaning from './assets/kanji_meaning.json'
 import KanjiCard from './KanjiCard'
+import { ArrowsRightLeftIcon } from '@heroicons/react/24/solid'
 
 function splitBy<T>(array: T[], n: number) {
   const ranges: T[][] = []
@@ -46,9 +47,9 @@ function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
     borderColor: theme.highlight
   }
   return (
-    <div className='flex border-2 border-gray-400 rounded m-px w-60 h-12 text-xl hover:bg-gray-400 cursor-pointer select-none flex' onClick={onClick}
+    <div className='flex border-2 border-gray-400 rounded m-px w-60 h-12 text-xl hover:bg-gray-400 select-none' onClick={onClick}
     style={active ? activeStyle : undefined}>
-      <div className='border-e-2 border-gray-400 p-1 font-[KanjiChart]'>{k.char}</div>
+      <div className='border-e-2 border-gray-400 p-1 font-[KanjiChart] flex items-center'>{k.char}</div>
       {solved && <div className='p-1 flex items-center line-clamp-1 border-gray-400 border-e-2 w-20'>{roms[0]}</div>}
       {solved && <div className='p-1 flex items-center text-base flex-1'>{getMeaning(k)[0]}</div>}
     </div>
@@ -182,10 +183,6 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
     }
   }
 
-  let hintText: string = useMemo(() =>
-    `${getMeaning(kanji)} (${getOn(kanji).join(", ")})`
-  , [kanji])
-
   function shuffle() {
     setKanjis(Array.from(kanjis).sort(() => Math.random() - 0.5))
   }
@@ -234,11 +231,27 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
     )
   }
 
+  function shuffleRange(kanjiStart: number, kanjiEnd: number) {
+    const slice = kanjis.slice(kanjiStart, kanjiEnd)
+    const newKanjis = kanjis.slice(0, kanjiStart).concat(slice.sort(() => Math.random() - 0.5)).concat(kanjis.slice(kanjiEnd, kanjis.length))
+    setKanjis(newKanjis)
+  }
+
   function QuizColumn({ kanjiRange }: { kanjiRange: Kanji[] }) {
+    const kanjiStart = kanjis.indexOf(kanjiRange[0])
+    const kanjiEnd = kanjis.indexOf(kanjiRange[kanjiRange.length - 1])
+    const colKanjis = kanjis.slice(kanjiStart, kanjiEnd)
+
     return (
       <div className='flex flex-col'>
+        <div
+          className='flex items-center justify-center rounded hover:bg-gray-400 active:bg-gray-500 m-px cursor-pointer'
+          onClick={() => shuffleRange(kanjiStart, kanjiEnd)}
+        >
+          <ArrowsRightLeftIcon className='size-6 rounded-full bg-gray-400 p-1 m-1' />
+        </div>
         {
-          kanjiRange.map((k, i) => (
+          colKanjis.map(k => (
             <QuizRow kanji={k} active={k == kanji} solved={solved[k.char] || cheat} onClick={() => {
               setCurrent(kanjis.indexOf(k))
               setSolved({ ...solved, [k.char]: false })
@@ -255,7 +268,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
 
   return (
     <div
-      className='h-screen flex flex-col items-center gap-4'
+      className='h-screen flex flex-col items-center'
       style={{backgroundColor: theme.surface}}
     >
       <QuizArea />
