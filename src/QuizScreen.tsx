@@ -47,10 +47,10 @@ function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
     borderColor: theme.highlight
   }
   return (
-    <div className='flex border-2 border-gray-400 rounded m-px w-60 h-12 text-xl hover:bg-gray-400 select-none' onClick={onClick}
+    <div className='flex border-2 border-n-highlight rounded m-px w-60 h-12 text-xl hover:bg-n-highlight select-none' onClick={onClick}
     style={active ? activeStyle : undefined}>
-      <div className='border-e-2 border-gray-400 p-1 font-[KanjiChart] flex items-center'>{k.char}</div>
-      {solved && <div className='p-1 flex items-center line-clamp-1 border-gray-400 border-e-2 w-20'>{roms[0]}</div>}
+      <div className='border-e-2 border-n-highlight p-1 font-[KanjiChart] flex items-center'>{k.char}</div>
+      {solved && <div className='p-1 flex items-center line-clamp-1 border-n-highlight border-e-2 w-20'>{roms[0]}</div>}
       {solved && <div className='p-1 flex items-center text-base flex-1'>{getMeaning(k)[0]}</div>}
     </div>
   )
@@ -101,7 +101,6 @@ function rotArray<T>(array: T[], predicate: (t: T) => boolean, start: number, di
 }
 
 function Inputs({ data, onComplete }: InputsProps) {
-  const theme = useTheme()
   const refs = data.map(() => useRef<HTMLInputElement>(null))
   const [completed, setCompleted] = useState(data.map(() => false))
 
@@ -137,14 +136,13 @@ function Inputs({ data, onComplete }: InputsProps) {
       { data.map((d, i) => {
         const onChange = (e: ChangeEvent<HTMLInputElement>) => checkInput(i, d.options, e)
         return d.autosuggestion ?
-          <AutoSuggestion words={d.options} onChange={onChange} minChars={2} aRef={refs[i]} />
+          <AutoSuggestion className='border-2 m-1 rounded border-highlight w-24' words={d.options} onChange={onChange} minChars={2} aRef={refs[i]} />
           :
           <input
-            className='border-2 m-1 border-gray-400 rounded text-lg bg-transparent focus:outline-none text-center w-16 h-10'
+            className='border-2 m-1 p-1 rounded text-lg bg-transparent border-highlight focus:outline-none w-16 h-10'
             type="text"
             key={i}
             readOnly={completed[i]}
-            style={{borderColor: completed[i] ? "red" : theme.highlight, width: d.width}}
             onChange={onChange}
             ref={refs[i]}
           />
@@ -165,7 +163,6 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   const [current, setCurrent] = useState(0)
   const [solved, setSolved] = useState<{[x: string]: boolean}>({})
   const [kanjis, setKanjis] = useState(kanjiRange)
-  const theme = useTheme()
   const input1 = useRef<HTMLInputElement>(null)
 
   const kanji = kanjis[current]
@@ -220,11 +217,11 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
         <div onKeyDown={checkMod} onKeyUp={checkMod}>
           <Inputs data={data} onComplete={nextKanji} />
         </div>
-        <button className='bg-gray-500' onClick={shuffle}>Random</button>
+        <button className='bg-n-accent border border-n-highlight p-1 rounded' onClick={shuffle}>Random</button>
         <input key="check" id="hint" type="checkbox" onChange={e => setCheat(e.target.checked) } checked={cheat} />
         <label htmlFor="hint">cheat</label>
         { hint &&
-          <div className='absolute top-14 rounded-md' style={{backgroundColor: theme.accent}}>
+          <div className='absolute top-14 rounded-md bg-accent'>
           <KanjiCard kanji={kanji} onlyMeta />
         </div> }
       </div>
@@ -245,10 +242,10 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
     return (
       <div className='flex flex-col'>
         <div
-          className='flex items-center justify-center rounded hover:bg-gray-400 active:bg-gray-500 m-px cursor-pointer'
+          className='flex items-center justify-center rounded hover:bg-n-accent active:bg-highlight m-px cursor-pointer'
           onClick={() => shuffleRange(kanjiStart, kanjiEnd)}
         >
-          <ArrowsRightLeftIcon className='size-6 rounded-full bg-gray-400 p-1 m-1' />
+          <ArrowsRightLeftIcon className='size-6 rounded-full bg-n-highlight p-1 m-1' />
         </div>
         {
           colKanjis.map(k => (
@@ -267,10 +264,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
 
 
   return (
-    <div
-      className='h-screen flex flex-col items-center'
-      style={{backgroundColor: theme.surface}}
-    >
+    <div className='h-screen flex flex-col items-center bg-surface'>
       <QuizArea />
       <div className='w-full flex min-h-0'>
         {

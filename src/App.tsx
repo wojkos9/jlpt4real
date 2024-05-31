@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import jlpt from './assets/jlpt.json'
 import QuizScreen from './QuizScreen'
 import Tile from './Tile'
-import { useTheme, ThemeProvider, themes, themeNeutral, ThemeSystem, Theme } from './theme'
+import { useTheme, ThemeProvider, themes, themeNeutral, Theme, applyTheme } from './theme'
 import KanjiCard from './KanjiCard'
 
 type ContentProps = {
@@ -40,7 +40,7 @@ function LevelButton({ variant, onClick, children, checked }: { variant: 'left' 
   const theme = useTheme()
   return (
     <button
-      className={`outline outline-1 outline-gray-400 py-1 px-3 text-gray-700 font-bold text-sm hover:bg-gray-400 ${borderRadius}`}
+      className={`outline outline-1 outline-n-highlight py-1 px-3 text-gray-700 font-bold text-sm hover:bg-n-highlight ${borderRadius}`}
       style={{
         backgroundColor: checked ? theme.highlight : theme.neutral.surface
       }}
@@ -50,25 +50,10 @@ function LevelButton({ variant, onClick, children, checked }: { variant: 'left' 
   )
 }
 
-function QuizButton({active, onClick}: {active: boolean, onClick: () => void}) {
-  const theme = useTheme()
+function QuizRangeButton({ onClick, children}: {onClick?: () => void, children: any}) {
   return (
     <button
-      className='m-2 p-1 w-24 border rounded-sm bg-gray-200 hover:bg-gray-300'
-      style={{borderColor: active ? theme.highlight : theme.neutral.highlight}}
-      onClick={onClick}
-    >
-      Quiz
-    </button>
-  )
-}
-
-function QuizRangeButton({active, onClick, children}: {active: boolean, onClick?: () => void, children: any}) {
-  const theme = useTheme()
-  return (
-    <button
-      className='m-1 p-1 w-40 border rounded-sm bg-gray-200 hover:bg-gray-300'
-      style={{borderColor: active ? theme.highlight : theme.neutral.highlight}}
+      className='m-1 p-1 w-40 border rounded-sm bg-n-accent border-n-highlight hover:bg-n-highlight'
       onClick={onClick}
     >
       {children}
@@ -117,7 +102,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
       <div className='flex flex-col m-1 items-center'>
         {
           ranges.map(([a, b]) =>
-            <QuizRangeButton active={false} onClick={() => setQuiz({
+            <QuizRangeButton onClick={() => setQuiz({
               level: level,
               range: [a, b]
             })}>{a+1}-{b}</QuizRangeButton>
@@ -129,20 +114,17 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
 }
 
 function ListScreen({level}: {level: Level}) {
-
   const [kanji, setKanji] = useState<Kanji | null>(jlpt[level][0])
-  const theme = useTheme()
-  const surfaceStyle: React.CSSProperties = {backgroundColor: theme.surface}
 
   return (
     <div className='flex flex-col h-screen'>
-      <div className='overflow-scroll flex-1 min-h-0' style={surfaceStyle}>
+      <div className='overflow-scroll flex-1 min-h-0 bg-surface'>
         <h1 className='text-xl font-bold my-3'>JLPT Level {level} Kanji List</h1>
         <div>This kanji list is derived from the pre-2010 Test Content Specification. As of 2010, there is no official kanji list.</div>
         <Content level={level} setKanji={setKanji} currentKanji={kanji?.char} isQuiz={false} />
       </div>
       { kanji
-        ? <div className='flex-1' style={surfaceStyle}>
+        ? <div className='flex-1 bg-surface'>
             <KanjiCard kanji={kanji} />
           </div>
         : null
@@ -165,9 +147,13 @@ function App() {
     setTheme({...themeNeutral, ...theme})
   }
 
+  useEffect(() => {
+    applyTheme(theme)
+  }, [theme])
+
   return (
     <ThemeProvider theme={theme}>
-      <div className='flex h-screen' style={{backgroundColor: theme.surface}}>
+      <div className='flex h-screen bg-surface'>
         <div className='w-[230px] h-screen'>
           <LeftPanel setTheme={setThemePartial} setQuiz={setQuizParams} level={level} setLevel={setLevel}/>
         </div>

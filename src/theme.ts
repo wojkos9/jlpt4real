@@ -12,20 +12,21 @@ type Themes = {
 }
 
 type Neutrals = {
-  neutral: Theme
+  neutral: Theme & { text: string }
 }
 
 export type ThemeSystem = Theme & Neutrals
 
-const themeNeutral: Neutrals = {
+const themeNeutralLight: Neutrals = {
   neutral: {
     surface: colors.gray["100"],
     accent: colors.gray["200"],
-    highlight: colors.gray["400"]
+    highlight: colors.gray["400"],
+    text: colors.black
   }
 }
 
-const themes: Themes = {
+const themesLight: Themes = {
   "N5": {
     surface: colors.yellow["50"],
     accent: colors.yellow["100"],
@@ -48,6 +49,61 @@ const themes: Themes = {
   }
 }
 
+
+const themeNeutralDark: Neutrals = {
+  neutral: {
+    surface: colors.gray["900"],
+    accent: colors.gray["800"],
+    highlight: colors.gray["600"],
+    text: colors.white
+  }
+}
+
+const themesDark: Themes = {
+  "N5": {
+    surface: colors.yellow["950"],
+    accent: colors.yellow["900"],
+    highlight: colors.yellow["800"]
+  },
+  "N4": {
+    surface: colors.green["950"],
+    accent: colors.green["800"],
+    highlight: colors.green["700"]
+  },
+  "N3": {
+    surface: colors.orange["950"],
+    accent: colors.orange["900"],
+    highlight: colors.orange["800"]
+  },
+  "N2": {
+    surface: colors.red["950"],
+    accent: colors.red["900"],
+    highlight: colors.red["800"]
+  }
+}
+
+const themeNeutral = themeNeutralDark
+const themes = themesDark
+
+function mapTheme(theme: ThemeSystem) {
+  return {
+    '--color-surface': theme.surface,
+    '--color-accent': theme.accent,
+    '--color-highlight': theme.highlight,
+    '--color-n-surface': theme.neutral.surface,
+    '--color-n-accent': theme.neutral.accent,
+    '--color-n-highlight': theme.neutral.highlight,
+    '--color-text': theme.neutral.text
+  }
+}
+
+function applyTheme(theme: ThemeSystem) {
+  const props = mapTheme(theme)
+  for (const [name, value] of Object.entries(props)) {
+    document.documentElement.style.setProperty(name, value)
+  }
+}
+
 const { ThemeProvider, useTheme } = createTheming<ThemeSystem>({...themes.N5, ...themeNeutral})
 
-export { ThemeProvider, useTheme, themes, themeNeutral }
+export { ThemeProvider, useTheme, themes, themeNeutral, applyTheme }
