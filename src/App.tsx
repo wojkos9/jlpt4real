@@ -21,7 +21,7 @@ function Content({level, setKanji, currentKanji, isQuiz}: ContentProps) {
       <div className={`${isQuiz ? 'hover:bg-gray-300 cursor-pointer' : ''}`}>
         {data.slice(i, i + ROW_LENGTH).map((k, j) =>
           <Tile
-            kanji={k}
+            kanji={k.char}
             isOdd={j % 2 == (i / ROW_LENGTH) % 2}
             onClick={() => setKanji(k)}
             current={k.char == currentKanji}

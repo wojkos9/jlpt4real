@@ -1,14 +1,13 @@
 import { useTheme } from "./theme"
 
 type TileProps = {
-  kanji: Kanji
+  kanji: string
   isOdd?: boolean
   onClick?: () => void
   current?: boolean
-  showHint?: boolean
 }
 
-export default function Tile({ kanji, isOdd, onClick, current, showHint }: TileProps) {
+export default function Tile({ kanji, isOdd, onClick, current }: TileProps) {
   const theme = useTheme()
   return (
     <div className='w-12 inline-flex flex-col align-middle m-[2px] cursor-pointer font-[KanjiChart]'>
@@ -20,11 +19,8 @@ export default function Tile({ kanji, isOdd, onClick, current, showHint }: TileP
         }}
         onClick={onClick}
       >
-        {kanji.char}
+        {kanji}
       </div>
-      {showHint &&
-        <a className='text-center text-xs text-slate-600'>{kanji.on.length == 0 ? "-" : kanji.on[0]}</a>
-      }
     </div>
   )
 }

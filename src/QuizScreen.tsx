@@ -6,6 +6,7 @@ import { AutoSuggestion } from './AutoSuggestion'
 import meaning from './assets/kanji_meaning.json'
 import KanjiCard from './KanjiCard'
 import { ArrowsRightLeftIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import krad from './assets/kradfile.json'
 
 function splitBy<T>(array: T[], n: number) {
   const ranges: T[][] = []
@@ -218,7 +219,10 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
 
     return (
       <div className='flex items-center gap-4'>
-        <Tile kanji={kanji} />
+        <div>
+          {krad[kanji.char as keyof typeof krad].map(r => <Tile kanji={r} />)}
+        </div>
+        <Tile kanji={kanji.char} />
         <div onKeyDown={checkMod} onKeyUp={checkMod}>
           <Inputs data={data} cheat={cheat} onComplete={nextKanji} />
         </div>
