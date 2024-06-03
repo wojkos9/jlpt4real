@@ -5,7 +5,7 @@ import { useTheme } from './theme'
 import { AutoSuggestion } from './AutoSuggestion'
 import meaning from './assets/kanji_meaning.json'
 import KanjiCard from './KanjiCard'
-import { ArrowsRightLeftIcon } from '@heroicons/react/24/solid'
+import { ArrowsRightLeftIcon, XMarkIcon } from '@heroicons/react/24/solid'
 
 function splitBy<T>(array: T[], n: number) {
   const ranges: T[][] = []
@@ -47,10 +47,10 @@ function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
     borderColor: theme.highlight
   }
   return (
-    <div className='flex border-2 border-n-highlight rounded m-px w-60 h-12 text-xl hover:bg-n-highlight select-none' onClick={onClick}
+    <div className='flex border border-n-highlight rounded mb-1 me-1 w-60 h-12 text-xl hover:bg-n-highlight select-none' onClick={onClick}
     style={active ? activeStyle : undefined}>
-      <div className='border-e-2 border-n-highlight p-1 font-[KanjiChart] flex items-center'>{k.char}</div>
-      {solved && <div className='p-1 flex items-center line-clamp-1 border-n-highlight border-e-2 w-20'>{roms[0]}</div>}
+      <div className='border-e border-n-highlight p-1 font-[KanjiChart] flex items-center'>{k.char}</div>
+      {solved && <div className='p-1 flex items-center line-clamp-1 border-n-highlight border-e w-20'>{roms[0]}</div>}
       {solved && <div className='p-1 flex items-center text-base flex-1'>{getMeaning(k)[0]}</div>}
     </div>
   )
@@ -78,12 +78,13 @@ function checkAnswer(valids: string[], ans: string): CheckResult {
 
 interface InputData {
   options: string[]
-  width: React.CSSProperties["width"]
+  width: string
   autosuggestion?: boolean
 }
 
 interface InputsProps {
   data: InputData[]
+  cheat: boolean
   onComplete: () => void
 }
 
@@ -100,7 +101,7 @@ function rotArray<T>(array: T[], predicate: (t: T) => boolean, start: number, di
   return start
 }
 
-function Inputs({ data, onComplete }: InputsProps) {
+function Inputs({ data, onComplete, cheat }: InputsProps) {
   const refs = data.map(() => useRef<HTMLInputElement>(null))
   const [completed, setCompleted] = useState(data.map(() => false))
 
@@ -115,37 +116,41 @@ function Inputs({ data, onComplete }: InputsProps) {
   }, [])
 
   function nextUncompleted(index: number) {
-    return rotArray(data.map((_, i) => i), i => !completed[i], index)
+    return rotArray(data.map((_, i) => i), i => !completed[i] || cheat, index)
   }
 
-  function checkInput(index: number, options: string[], e: ChangeEvent<HTMLInputElement>) {
-    const answer = e.target.value
-    if (checkAnswer(options, answer) == CheckResult.CORRECT_ONE) {
+  function onCorrectAnswer(index: number) {
+    if (completed.some(x => !x)) {
+      setCompleted([...completed.slice(0, index), true, ...completed.slice(index+1)])
+      refs[nextUncompleted(index)].current!.focus()
+    } else {
+      onComplete()
+    }
+  }
+
+  function checkInput(index: number, options: string[], e: HTMLInputElement, force?: boolean) {
+    const answer = e.value
+    const ans = checkAnswer(options, answer)
+    if (ans == CheckResult.CORRECT_ONE || ans == CheckResult.CORRECT_MANY && force) {
       // e.target.value = ""
-      if (completed.some(x => !x)) {
-        setCompleted([...completed.slice(0, index), true, ...completed.slice(index+1)])
-        refs[nextUncompleted(index)].current!.focus()
-      } else {
-        onComplete()
-      }
+      onCorrectAnswer(index)
     }
   }
 
   return (
     <div>
       { data.map((d, i) => {
-        const onChange = (e: ChangeEvent<HTMLInputElement>) => checkInput(i, d.options, e)
-        return d.autosuggestion ?
-          <AutoSuggestion className='border-2 m-1 rounded border-highlight w-24' words={d.options} onChange={onChange} minChars={2} aRef={refs[i]} />
-          :
-          <input
-            className='border-2 m-1 p-1 rounded text-lg bg-transparent border-highlight focus:outline-none w-16 h-10'
-            type="text"
-            key={i}
-            readOnly={completed[i]}
-            onChange={onChange}
-            ref={refs[i]}
-          />
+        const onChange = (e: HTMLInputElement, force?: boolean) => checkInput(i, d.options, e, force)
+        return (
+          <AutoSuggestion
+            width={d.width}
+            filledIn={d.autosuggestion ? i > 0 && completed[i-1] : cheat}
+            className='border-2 m-1 rounded border-highlight'
+            words={d.options} onChange={onChange}
+            minChars={d.autosuggestion ? 2 : 10}
+            aRef={refs[i]} />
+        )
+
       }) }
     </div>
   )
@@ -156,7 +161,7 @@ function getMeaning(k: Kanji) {
 }
 
 function getOn(k: Kanji) {
-  return k.on.slice(0, 1)
+  return k.on //.slice(0, 1)
 }
 
 export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
@@ -186,7 +191,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   useEffect(() => setCurrent(0), [kanjis])
   useEffect(() => setKanjis(kanjiRange), [kanjiRange])
   const [hint, setHint] = useState(false)
-  const [cheat, setCheat] = useState(true)
+  const [cheat, setCheat] = useState(false)
 
   function QuizArea() {
 
@@ -215,13 +220,13 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
       <div className='flex items-center gap-4'>
         <Tile kanji={kanji} />
         <div onKeyDown={checkMod} onKeyUp={checkMod}>
-          <Inputs data={data} onComplete={nextKanji} />
+          <Inputs data={data} cheat={cheat} onComplete={nextKanji} />
         </div>
         <button className='bg-n-accent border border-n-highlight p-1 rounded' onClick={shuffle}>Random</button>
         <input key="check" id="hint" type="checkbox" onChange={e => setCheat(e.target.checked) } checked={cheat} />
         <label htmlFor="hint">cheat</label>
         { hint &&
-          <div className='absolute top-14 rounded-md bg-accent'>
+          <div className='absolute top-14 rounded-md bg-surface border-2 p-1 border-highlight'>
           <KanjiCard kanji={kanji} onlyMeta />
         </div> }
       </div>
@@ -237,15 +242,29 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   function QuizColumn({ kanjiRange }: { kanjiRange: Kanji[] }) {
     const kanjiStart = kanjis.indexOf(kanjiRange[0])
     const kanjiEnd = kanjis.indexOf(kanjiRange[kanjiRange.length - 1])
-    const colKanjis = kanjis.slice(kanjiStart, kanjiEnd)
+    const colKanjis = kanjis.slice(kanjiStart, kanjiEnd + 1)
+
+    function clear() {
+      const newSolved = {...solved}
+      colKanjis.forEach(k => newSolved[k.char] = false)
+      setSolved(newSolved)
+    }
 
     return (
       <div className='flex flex-col'>
-        <div
-          className='flex items-center justify-center rounded hover:bg-n-accent active:bg-highlight m-px cursor-pointer'
-          onClick={() => shuffleRange(kanjiStart, kanjiEnd)}
-        >
-          <ArrowsRightLeftIcon className='size-6 rounded-full bg-n-highlight p-1 m-1' />
+        <div className='flex'>
+          <div
+            className='flex-1 flex items-center justify-center rounded hover:bg-n-accent active:bg-n-highlight m-px cursor-pointer'
+            onClick={() => shuffleRange(kanjiStart, kanjiEnd)}
+          >
+            <ArrowsRightLeftIcon className='size-6 rounded-full bg-n-highlight p-1 m-1' />
+          </div>
+          <div
+            className='flex-1 flex items-center justify-center rounded hover:bg-n-accent active:bg-n-highlight m-px cursor-pointer'
+            onClick={() => clear()}
+          >
+            <XMarkIcon className='size-6 rounded-full bg-n-highlight p-1 m-1'/>
+          </div>
         </div>
         {
           colKanjis.map(k => (
