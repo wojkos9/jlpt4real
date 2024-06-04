@@ -1,12 +1,14 @@
 import Kuroshiro, { System } from 'kuroshiro'
 import { useState, useRef, ChangeEvent, KeyboardEvent, useEffect, useMemo } from 'react'
 import Tile from './Tile'
-import { useTheme } from './theme'
+import { themes, useTheme } from './theme'
 import { AutoSuggestion } from './AutoSuggestion'
 import meaning from './assets/kanji_meaning.json'
 import KanjiCard from './KanjiCard'
 import { ArrowsRightLeftIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import krad from './assets/kradfile.json'
+import jlpt from './assets/jlpt.json'
+import trans from './assets/trans.json'
 
 function splitBy<T>(array: T[], n: number) {
   const ranges: T[][] = []
@@ -23,6 +25,7 @@ function rom(x: string, system?: System) {
 
 type QuizScreenProps = {
   kanjiRange: Kanji[]
+  level: Level
 }
 
 interface QuizRowProps {
@@ -32,6 +35,9 @@ interface QuizRowProps {
   active: boolean
 }
 
+interface JLPTKanji extends Kanji {
+  level: Level
+}
 
 function unique<T>(x: T[]): T[] {
   return Array.from(new Set(x))
@@ -157,15 +163,25 @@ function Inputs({ data, onComplete, cheat }: InputsProps) {
   )
 }
 
-function getMeaning(k: Kanji) {
-  return [meaning[k.char as any as keyof typeof meaning]]
+export function getMeaning(k: Kanji) {
+  return  [trans[k.char][0]] // [meaning[k.char as any as keyof typeof meaning]]
 }
 
 function getOn(k: Kanji) {
   return k.on //.slice(0, 1)
 }
 
-export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
+function SimilarRow({ kanji }: { kanji: JLPTKanji }) {
+  return (
+    <tr className='text-nowrap'>
+      <td style={{backgroundColor: themes[kanji.level].highlight}}>{kanji.char}</td>
+      <td className='px-2'>{kanji.on[0]}</td>
+      <td className='px-2'>{kanji.meaning.join(",")}</td>
+    </tr>
+  )
+}
+
+export default function QuizScreen({ kanjiRange, level }: QuizScreenProps) {
   const [current, setCurrent] = useState(0)
   const [solved, setSolved] = useState<{[x: string]: boolean}>({})
   const [kanjis, setKanjis] = useState(kanjiRange)
@@ -195,6 +211,32 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
   const [cheat, setCheat] = useState(false)
 
   function QuizArea() {
+    const [radicals, setRadicals] = useState<string[]>([])
+    const [similar, setSimilar] = useState<JLPTKanji[]>([])
+
+    useEffect(() => {
+      if (radicals.length) {
+        let similarChars = Object.entries(krad).filter(
+          ([_, v]) => radicals.every(r => v.includes(r))
+        ).map(([k, _]) => k)
+
+        const similarKanji: JLPTKanji[] = []
+        const levels: Level[] = ["N5", "N4", "N3", "N2"]
+        for (const lvl of levels) {
+          for (const k of jlpt[lvl]) {
+            if (similarChars.includes(k.char)) {
+              similarKanji.push({...k, level: lvl})
+              similarChars = similarChars.filter(c => c != k.char)
+            }
+          }
+
+          if (lvl == level) {
+            break
+          }
+        }
+        setSimilar(similarKanji.reverse())
+      }
+    }, [radicals])
 
     const data: InputData[] = [
       { options: allRom(getOn(kanji)), width: "4rem" },
@@ -205,7 +247,7 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
       console.log(e)
       if (e.key == "Tab" && e.type == "keydown") {
         e.preventDefault()
-      } else if (e.key == "Alt") {
+      } else if (e.key == "Shift") {
         e.preventDefault()
         setHint(e.type == "keydown")
       } else if (e.key == "Delete") {
@@ -217,12 +259,24 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
       }
     }
 
+    function toggleRadical(r: string) {
+      if (radicals.includes(r)) {
+        setRadicals(radicals.filter(e => e != r))
+      } else {
+        setRadicals([...radicals, r])
+      }
+    }
+
     return (
       <div className='flex items-center gap-4'>
-        <div>
-          {krad[kanji.char as keyof typeof krad].map(r => <Tile kanji={r} />)}
+        <div className='flex h-14 flex-col flex-wrap-reverse'>
+          {
+            krad[kanji.char as keyof typeof krad].map(r => (
+              <Tile kanji={r} size={7} current={radicals.includes(r)} onClick={() => toggleRadical(r)}/>
+            ))
+          }
         </div>
-        <Tile kanji={kanji.char} />
+        <Tile kanji={kanji.char} size={14} />
         <div onKeyDown={checkMod} onKeyUp={checkMod}>
           <Inputs data={data} cheat={cheat} onComplete={nextKanji} />
         </div>
@@ -232,6 +286,12 @@ export default function QuizScreen({ kanjiRange }: QuizScreenProps) {
         { hint &&
           <div className='absolute top-14 rounded-md bg-surface border-2 p-1 border-highlight'>
           <KanjiCard kanji={kanji} onlyMeta />
+        </div> }
+        { radicals.length > 0 &&
+          <div className='absolute top-14 rounded-md bg-surface border-2 p-1 border-highlight max-h-96 overflow-scroll'>
+            <table>
+            {similar.map(s => <SimilarRow kanji={s}/>)}
+            </table>
         </div> }
       </div>
     )

@@ -21,6 +21,8 @@ function Content({level, setKanji, currentKanji, isQuiz}: ContentProps) {
       <div className={`${isQuiz ? 'hover:bg-gray-300 cursor-pointer' : ''}`}>
         {data.slice(i, i + ROW_LENGTH).map((k, j) =>
           <Tile
+            size={12}
+            className="m-[2px]"
             kanji={k.char}
             isOdd={j % 2 == (i / ROW_LENGTH) % 2}
             onClick={() => setKanji(k)}
@@ -160,7 +162,7 @@ function App() {
         <div className='w-full'>
           { quizParams == null
           ? <ListScreen level={level} />
-          : <QuizScreen kanjiRange={jlpt[level].slice(...quizParams.range)}/>
+          : <QuizScreen level={level} kanjiRange={jlpt[level].slice(...quizParams.range)}/>
           }
         </div>
       </div>
