@@ -82,8 +82,17 @@ const themesDark: Themes = {
   }
 }
 
+const themesMono = Object.fromEntries(
+Object.entries(themesDark).map(([k, v]) =>
+  [k, {
+    surface:  colors.gray["900"],
+    accent:  colors.gray["800"],
+    highlight: v.highlight
+  }])
+) as Themes
+
 const themeNeutral = themeNeutralDark
-const themes = themesDark
+const themes = themesMono
 
 function mapTheme(theme: ThemeSystem) {
   return {

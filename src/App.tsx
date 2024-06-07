@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, KeyboardEvent } from 'react'
 import jlpt from './assets/jlpt.json'
 import QuizScreen from './QuizScreen'
 import Tile from './Tile'
@@ -73,6 +73,7 @@ interface ListScreenProps {
 function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
   const allLevels: Level[] = ["N5", "N4", "N3", "N2"]
   const kanjiRange = jlpt[level]
+  const [custom, setCustom] = useState(false)
 
   const quizRange = 100
   const ranges: [number, number][] = []
@@ -105,10 +106,25 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
         {
           ranges.map(([a, b]) =>
             <QuizRangeButton onClick={() => setQuiz({
-              level: level,
-              range: [a, b]
+              kanji: kanjiRange.slice(a, b)
             })}>{a+1}-{b}</QuizRangeButton>
           )
+        }
+        { custom
+          ? <textarea
+            className='bg-surface border-2 border-highlight focus:outline-none'
+            onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>) => {
+            if (e.key == 'Enter') {
+              const chars = (e.target as HTMLTextAreaElement).value.split("")
+              const jlptKanji = Object.values<Kanji[]>(jlpt).reduce((x, y) => x.concat(y))
+              const kanji = chars.map(c => jlptKanji.find(k => k.char == c) as Kanji).filter(x => x)
+              if (kanji.length > 0) {
+                setQuiz({ kanji })
+              }
+              setCustom(false)
+            }
+          }}/>
+          : <QuizRangeButton onClick={() => setCustom(true)}>Custom</QuizRangeButton>
         }
       </div>
     </div>
@@ -136,8 +152,7 @@ function ListScreen({level}: {level: Level}) {
 }
 
 type QuizParams = {
-  level: Level
-  range: [number, number]
+  kanji: Kanji[]
 }
 
 function App() {
@@ -155,14 +170,14 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <div className='flex h-screen bg-surface'>
+      <div className='flex h-screen bg-surface overflow-x-scroll'>
         <div className='w-[230px] h-screen'>
           <LeftPanel setTheme={setThemePartial} setQuiz={setQuizParams} level={level} setLevel={setLevel}/>
         </div>
         <div className='w-full'>
           { quizParams == null
           ? <ListScreen level={level} />
-          : <QuizScreen level={level} kanjiRange={jlpt[level].slice(...quizParams.range)}/>
+          : <QuizScreen level={level} kanjiRange={quizParams.kanji}/>
           }
         </div>
       </div>

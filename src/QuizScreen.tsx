@@ -230,9 +230,9 @@ export default function QuizScreen({ kanjiRange, level }: QuizScreenProps) {
             }
           }
 
-          if (lvl == level) {
-            break
-          }
+          // if (lvl == level) {
+          //   break
+          // }
         }
         setSimilar(similarKanji.reverse())
       }
@@ -247,7 +247,7 @@ export default function QuizScreen({ kanjiRange, level }: QuizScreenProps) {
       console.log(e)
       if (e.key == "Tab" && e.type == "keydown") {
         e.preventDefault()
-      } else if (e.key == "Shift") {
+      } else if (e.key == "ArrowRight") {
         e.preventDefault()
         setHint(e.type == "keydown")
       } else if (e.key == "Delete") {
