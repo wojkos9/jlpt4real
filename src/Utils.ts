@@ -1,0 +1,39 @@
+import Kuroshiro, { System } from "kuroshiro"
+
+export function rotArray<T>(array: T[], predicate: (t: T) => boolean, start: number, dir: 1 | -1 = 1) {
+  function rot1(i: number) {
+    return (i + dir + array.length) % array.length
+  }
+
+  for (let i = rot1(start); i != start; i = rot1(i)) {
+    if (predicate(array[i])) {
+      return i
+    }
+  }
+  return start
+}
+
+export function splitBy<T>(array: T[], n: number) {
+  const ranges: T[][] = []
+  for (let i = 0; i < array.length; i += n) {
+    ranges.push(array.slice(i, Math.min(i + n, array.length)))
+  }
+  return ranges
+}
+
+function rom(x: string, system?: System) {
+  const systems: System[] = system ? [system] : ["nippon", "hepburn"]
+  return systems.map(r => Kuroshiro.Util.kanaToRomaji(x, r))
+}
+
+function unique<T>(x: T[]): T[] {
+  return Array.from(new Set(x))
+}
+
+export function allRom(readings: string[], system?: System) {
+  return readings.map(o => unique(rom(o, system))).reduce((x, y) => x.concat(y))
+}
+
+export function getOn(k: Kanji) {
+  return k.on //.slice(0, 1)
+}

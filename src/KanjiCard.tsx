@@ -1,7 +1,7 @@
 import { ReactElement } from 'react'
 import jlpt from './assets/jlpt.json'
 import { themeNeutral, themes } from './theme'
-import { getMeaning } from './QuizScreen'
+import { getMeaning } from './QuizScreen/QuizScreen'
 
 function getLevel(k: string) {
   const lvls: Level[] = ["N5", "N4", "N3", "N2"]

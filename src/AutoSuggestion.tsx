@@ -14,11 +14,8 @@ export function AutoSuggestion({ onChange, className, words, minChars, aRef, fil
   const [suggestion, setSuggestion] = useState("")
 
   useEffect(() => {
-    if (filledIn) {
-      // aRef.current!.value = words[0]
-      setSuggestion(words[0])
-    }
-  }, )
+    setSuggestion(filledIn ? words[0] : "")
+  }, [filledIn])
 
   function getSuggestion(start: string) {
     return start.length >= minChars ? words.reduce((p, c) => start && c.toLowerCase().startsWith(start.toLowerCase()) && (!p || c.length < p.length) ? c : p, "") : ""

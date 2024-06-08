@@ -1,6 +1,6 @@
 import { useEffect, useState, KeyboardEvent } from 'react'
 import jlpt from './assets/jlpt.json'
-import QuizScreen from './QuizScreen'
+import QuizScreen from './QuizScreen/QuizScreen'
 import Tile from './Tile'
 import { useTheme, ThemeProvider, themes, themeNeutral, Theme, applyTheme } from './theme'
 import KanjiCard from './KanjiCard'
@@ -112,7 +112,9 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
         }
         { custom
           ? <textarea
-            className='bg-surface border-2 border-highlight focus:outline-none'
+            className='bg-surface border-2 border-highlight overflow-hidden focus:outline-none'
+            placeholder='Enter kanjis for quiz'
+            // onInput={e => {e.target.style.height = ""; e.target.style.height = e.target.scrollHeight + 'px'}}
             onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>) => {
             if (e.key == 'Enter') {
               const chars = (e.target as HTMLTextAreaElement).value.split("")
