@@ -15,6 +15,8 @@ type Kanji = {
   compound: Compound[]
 }
 
+type Lang = "pl" | "en"
+
 declare module 'kuroshiro' {
   export type System = "nippon" | "passport" | "hepburn"
   interface Util {
@@ -24,8 +26,4 @@ declare module 'kuroshiro' {
     Util: Util
   }
   export default Kuroshiro
-}
-
-declare module 'assets/trans.json' {
-  export default null;
 }

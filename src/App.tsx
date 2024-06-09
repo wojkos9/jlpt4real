@@ -1,9 +1,11 @@
-import { useEffect, useState, KeyboardEvent } from 'react'
+import { useEffect, useState, KeyboardEvent, createContext, useContext } from 'react'
 import jlpt from './assets/jlpt.json'
 import QuizScreen from './QuizScreen/QuizScreen'
 import Tile from './Tile'
 import { useTheme, ThemeProvider, themes, themeNeutral, Theme, applyTheme } from './theme'
 import KanjiCard from './KanjiCard'
+import { Toggle } from './common/Toggle'
+import { LangContext } from './Utils'
 
 type ContentProps = {
   level: Level
@@ -68,9 +70,10 @@ interface ListScreenProps {
   setQuiz: (q: QuizParams | null) => void
   level: Level
   setLevel: (x: Level) => void
+  setLang: (l: Lang) => void
 }
 
-function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
+function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang }: ListScreenProps) {
   const allLevels: Level[] = ["N5", "N4", "N3", "N2"]
   const kanjiRange = jlpt[level]
   const [custom, setCustom] = useState(false)
@@ -88,6 +91,11 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
     // }
     ranges.push([i, next])
   }
+
+  const lang = useContext(LangContext)
+  const langActive = "text-highlight"
+  const langInactive = ""
+
   return (
     <div>
       <div className='text-center text-sm m-1'>level</div>
@@ -103,6 +111,11 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel }: ListScreenProps) {
         ))}
       </div>
       <div className='flex flex-col m-1 items-center'>
+        <div className='flex items-center gap-2 m-1'>
+          <a className={lang == 'pl' ? langActive : langInactive}>PL</a>
+            <Toggle on={lang == 'en'} onChange={c => setLang(c ? "en" : "pl")} />
+          <a className={lang == 'en' ? langActive : langInactive} >EN</a>
+        </div>
         {
           ranges.map(([a, b]) =>
             <QuizRangeButton onClick={() => setQuiz({
@@ -161,6 +174,7 @@ function App() {
   const [level, setLevel] = useState<Level>("N4")
   const [theme, setTheme] = useState({...themeNeutral, ...themes["N4"]})
   const [quizParams, setQuizParams] = useState<QuizParams | null>(null)
+  const [lang, setLang] = useState<Lang>("pl")
 
   function setThemePartial(theme: Theme) {
     setTheme({...themeNeutral, ...theme})
@@ -172,17 +186,25 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <div className='flex h-screen bg-surface overflow-x-scroll'>
-        <div className='w-[230px] h-screen'>
-          <LeftPanel setTheme={setThemePartial} setQuiz={setQuizParams} level={level} setLevel={setLevel}/>
+      <LangContext.Provider value={lang}>
+        <div className='flex h-screen bg-surface overflow-x-scroll'>
+          <div className='w-[230px] h-screen'>
+            <LeftPanel
+              setTheme={setThemePartial}
+              setQuiz={setQuizParams}
+              level={level}
+              setLevel={setLevel}
+              setLang={setLang}
+            />
+          </div>
+          <div className='w-full'>
+            { quizParams == null
+            ? <ListScreen level={level} />
+            : <QuizScreen level={level} kanjiRange={quizParams.kanji}/>
+            }
+          </div>
         </div>
-        <div className='w-full'>
-          { quizParams == null
-          ? <ListScreen level={level} />
-          : <QuizScreen level={level} kanjiRange={quizParams.kanji}/>
-          }
-        </div>
-      </div>
+      </LangContext.Provider>
     </ThemeProvider>
   )
 }

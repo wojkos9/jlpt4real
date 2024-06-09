@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, memo, KeyboardEvent } from "react"
+import { useState, useEffect, useMemo, useCallback, memo, KeyboardEvent, useContext } from "react"
 import KanjiCard from "../KanjiCard"
 import Tile from "../Tile"
 import Inputs, { InputData } from "./Inputs"
@@ -6,18 +6,20 @@ import { getMeaning } from "./QuizScreen"
 import krad from '../assets/kradfile.json'
 import jlpt from '../assets/jlpt.json'
 import { themes } from "../theme"
-import { allRom, getOn } from "../Utils"
+import { LangContext, allRom, getOn } from "../Utils"
+import { Toggle } from "../common/Toggle"
 
 interface JLPTKanji extends Kanji {
   level: Level
 }
 
 function SimilarRow({ kanji }: { kanji: JLPTKanji }) {
+  const lang = useContext(LangContext)
   return (
     <tr className='text-nowrap'>
       <td style={{backgroundColor: themes[kanji.level].highlight}}>{kanji.char}</td>
       <td className='px-2'>{kanji.on[0]}</td>
-      <td className='px-2'>{kanji.meaning.join(",")}</td>
+      <td className='px-2'>{getMeaning(kanji, lang).join(", ")}</td>
     </tr>
   )
 }
@@ -58,10 +60,12 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateCheat }: QuizAre
 
   useEffect(() => updateCheat(cheat), [cheat])
 
+  const lang = useContext(LangContext)
+
   const data: InputData[] = useMemo(() => [
     { options: allRom(getOn(kanji)), width: "4rem" },
-    { options: getMeaning(kanji), width: "8rem", autosuggestion: true }
-  ], [kanji])
+    { options: getMeaning(kanji, lang), width: "8rem", autosuggestion: true }
+  ], [kanji, lang])
 
   function checkMod(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key == "Tab" && e.type == "keydown") {
@@ -96,8 +100,10 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateCheat }: QuizAre
         <Inputs data={data} onComplete={nextKanji} />
       </div>
       <button className='bg-n-accent border border-n-highlight p-1 rounded' onClick={shuffle}>Random</button>
-      <input key="check" id="hint" type="checkbox" onChange={e => setCheat(e.target.checked) } checked={cheat} />
-      <label htmlFor="hint">cheat</label>
+      <div className="flex items-center gap-2">
+        <Toggle on={cheat} onChange={(c) => setCheat(c)} />
+        <a className={`text-lg select-none ${cheat ? 'text-highlight' : ''}`}>cheat</a>
+      </div>
       { hint &&
         <div className='absolute top-14 rounded-md bg-surface border-2 p-1 border-highlight'>
         <KanjiCard kanji={kanji} onlyMeta />

@@ -1,4 +1,5 @@
 import Kuroshiro, { System } from "kuroshiro"
+import { createContext } from "react"
 
 export function rotArray<T>(array: T[], predicate: (t: T) => boolean, start: number, dir: 1 | -1 = 1) {
   function rot1(i: number) {
@@ -37,3 +38,5 @@ export function allRom(readings: string[], system?: System) {
 export function getOn(k: Kanji) {
   return k.on //.slice(0, 1)
 }
+
+export const LangContext = createContext<Lang>("pl")

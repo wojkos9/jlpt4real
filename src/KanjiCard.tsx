@@ -1,7 +1,8 @@
-import { ReactElement } from 'react'
+import { ReactElement, useContext } from 'react'
 import jlpt from './assets/jlpt.json'
 import { themeNeutral, themes } from './theme'
 import { getMeaning } from './QuizScreen/QuizScreen'
+import { LangContext } from './Utils'
 
 function getLevel(k: string) {
   const lvls: Level[] = ["N5", "N4", "N3", "N2"]
@@ -38,9 +39,10 @@ function KanjiCompound({ compound }: {compound: Compound}) {
   }
 
 export default function KanjiCard({ kanji, onlyMeta }: { kanji: Kanji, onlyMeta?: boolean }) {
+  const lang = useContext(LangContext)
     return (
       <div className='px-4'>
-        <div className='text-xl m-1'>{getMeaning(kanji).join(", ")}</div>
+        <div className='text-xl m-1'>{getMeaning(kanji, lang).join(", ")}</div>
         { !onlyMeta &&
         <div className='text-8xl text-center font-[KanjiChart] bg-accent'>{kanji.char}</div>
         }

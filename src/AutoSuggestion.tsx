@@ -1,4 +1,4 @@
-import { ChangeEvent, HTMLAttributes, RefObject, useEffect, useState } from "react"
+import { RefObject, useEffect, useState } from "react"
 
 interface AutoSuggestionProps {
   onChange: (e: HTMLInputElement, force?: boolean) => void

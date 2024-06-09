@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, useCallback, KeyboardEvent } from 'react'
+import { useState, useRef, useEffect, useCallback, KeyboardEvent, useContext } from 'react'
 import { useTheme } from '../theme'
 import { ArrowsRightLeftIcon, XMarkIcon } from '@heroicons/react/24/solid'
-
 import trans from '../assets/trans.json'
-import { allRom, getOn, rotArray, splitBy } from '../Utils'
+import meaning from '../assets/kanji_meaning.json'
+import { allRom, getOn, LangContext, rotArray, splitBy } from '../Utils'
 import QuizArea from './QuizArea'
 
 type QuizScreenProps = {
@@ -24,18 +24,21 @@ function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
   const activeStyle: React.CSSProperties = {
     borderColor: theme.highlight
   }
+  const lang = useContext(LangContext)
+
   return (
     <div className='flex border border-n-highlight rounded mb-1 me-1 w-60 h-12 text-xl hover:bg-n-highlight select-none' onClick={onClick}
     style={active ? activeStyle : undefined}>
       <div className='border-e border-n-highlight p-1 font-[KanjiChart] flex items-center'>{k.char}</div>
       {solved && <div className='p-1 flex items-center line-clamp-1 border-n-highlight border-e w-20'>{roms[0]}</div>}
-      {solved && <div className='p-1 flex items-center text-base flex-1'>{getMeaning(k)[0]}</div>}
+      {solved && <div className='p-1 flex items-center text-base flex-1'>{getMeaning(k, lang, true)[0]}</div>}
     </div>
   )
 }
 
-export function getMeaning(k: Kanji) {
-  return  [trans[k.char as keyof typeof trans][0]] // [meaning[k.char as any as keyof typeof meaning]]
+export function getMeaning(k: Kanji, lang: Lang, single: boolean = false) {
+  return lang == "pl" ? trans[k.char as keyof typeof trans].slice(0, single ? 1 : undefined)
+    : (single ? [meaning[k.char as any as keyof typeof meaning]] : k.meaning)
 }
 
 
