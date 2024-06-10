@@ -32,7 +32,7 @@ function unique<T>(x: T[]): T[] {
 }
 
 export function allRom(readings: string[], system?: System) {
-  return readings.map(o => unique(rom(o, system))).reduce((x, y) => x.concat(y))
+  return readings.map(o => unique(rom(o, system))).reduce((x, y) => x.concat(y), [])
 }
 
 export function getOn(k: Kanji) {

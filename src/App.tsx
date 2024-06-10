@@ -1,5 +1,5 @@
 import { useEffect, useState, KeyboardEvent, createContext, useContext } from 'react'
-import jlpt from './assets/jlpt.json'
+import jlpt from './jlpt'
 import QuizScreen from './QuizScreen/QuizScreen'
 import Tile from './Tile'
 import { useTheme, ThemeProvider, themes, themeNeutral, Theme, applyTheme } from './theme'
@@ -74,7 +74,7 @@ interface ListScreenProps {
 }
 
 function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang }: ListScreenProps) {
-  const allLevels: Level[] = ["N5", "N4", "N3", "N2"]
+  const allLevels: Level[] = ["N5", "N4", "N3", "N2", "N1"]
   const kanjiRange = jlpt[level]
   const [custom, setCustom] = useState(false)
 
@@ -188,7 +188,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <LangContext.Provider value={lang}>
         <div className='flex h-screen bg-surface overflow-x-scroll'>
-          <div className='w-[230px] h-screen'>
+          <div className='w-[260px] h-screen'>
             <LeftPanel
               setTheme={setThemePartial}
               setQuiz={setQuizParams}

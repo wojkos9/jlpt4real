@@ -4,7 +4,7 @@ import Tile from "../Tile"
 import Inputs, { InputData } from "./Inputs"
 import { getMeaning } from "./QuizScreen"
 import krad from '../assets/kradfile.json'
-import jlpt from '../assets/jlpt.json'
+import jlpt from '../jlpt'
 import { themes } from "../theme"
 import { LangContext, allRom, getOn } from "../Utils"
 import { Toggle } from "../common/Toggle"

@@ -46,6 +46,11 @@ const themesLight: Themes = {
     surface: colors.pink["50"],
     accent: colors.pink["100"],
     highlight: colors.pink["200"]
+  },
+  "N1": {
+    surface: colors.purple["50"],
+    accent: colors.purple["100"],
+    highlight: colors.purple["200"]
   }
 }
 
@@ -79,6 +84,11 @@ const themesDark: Themes = {
     surface: colors.pink["950"],
     accent: colors.pink["900"],
     highlight: colors.pink["800"]
+  },
+  "N1": {
+    surface: colors.purple["950"],
+    accent: colors.purple["900"],
+    highlight: colors.purple["800"]
   }
 }
 
