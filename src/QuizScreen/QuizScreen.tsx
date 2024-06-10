@@ -61,7 +61,7 @@ export default function QuizScreen({ kanjiRange, level }: QuizScreenProps) {
   useEffect(() => setCurrent(0), [kanjis])
   useEffect(() => setKanjis(kanjiRange), [kanjiRange])
 
-  const [cheat, setCheat] = useState(false)
+  const [reveal, setReveal] = useState(false)
 
 
 
@@ -100,7 +100,7 @@ export default function QuizScreen({ kanjiRange, level }: QuizScreenProps) {
         </div>
         {
           colKanjis.map(k => (
-            <QuizRow key={k.char} kanji={k} active={k == kanji} solved={solved[k.char] || cheat} onClick={() => {
+            <QuizRow key={k.char} kanji={k} active={k == kanji} solved={solved[k.char] || reveal} onClick={() => {
               setCurrent(kanjis.indexOf(k))
               input1.current!.value = ""
               input1.current!.focus()
@@ -139,7 +139,7 @@ export default function QuizScreen({ kanjiRange, level }: QuizScreenProps) {
         shuffle={shuffle}
         nextKanji={nextKanji}
         handleKey={handleKey}
-        updateCheat={setCheat}
+        updateReveal={setReveal}
       />
       <div className='w-full flex min-h-0'>
         {

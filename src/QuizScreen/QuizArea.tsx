@@ -29,14 +29,14 @@ interface QuizAreaProps {
   shuffle: () => void
   nextKanji: () => void
   handleKey: (e: KeyboardEvent) => void
-  updateCheat: (cheat: boolean) => void
+  updateReveal: (reveal: boolean) => void
 }
 
-function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateCheat }: QuizAreaProps) {
+function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAreaProps) {
   const [radicals, setRadicals] = useState<string[]>([])
   const [similar, setSimilar] = useState<JLPTKanji[]>([])
   const [hint, setHint] = useState(false)
-  const [cheat, setCheat] = useState(false)
+  const [reveal, setReveal] = useState(false)
 
   useEffect(() => {
     if (radicals.length) {
@@ -58,7 +58,11 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateCheat }: QuizAre
     }
   }, [radicals])
 
-  useEffect(() => updateCheat(cheat), [cheat])
+  useEffect(() => {
+    setRadicals([])
+  }, [kanji, hint])
+
+  useEffect(() => updateReveal(reveal), [reveal])
 
   const lang = useContext(LangContext)
 
@@ -101,8 +105,8 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateCheat }: QuizAre
       </div>
       <button className='bg-n-accent border border-n-highlight p-1 rounded' onClick={shuffle}>Random</button>
       <div className="flex items-center gap-2">
-        <Toggle on={cheat} onChange={(c) => setCheat(c)} />
-        <a className={`text-lg select-none ${cheat ? 'text-highlight' : ''}`}>cheat</a>
+        <Toggle on={reveal} onChange={(c) => setReveal(c)} />
+        <a className={`text-lg select-none ${reveal ? 'text-highlight' : ''}`}>reveal</a>
       </div>
       { hint &&
         <div className='absolute top-14 rounded-md bg-surface border-2 p-1 border-highlight'>
