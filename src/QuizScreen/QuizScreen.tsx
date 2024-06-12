@@ -27,11 +27,11 @@ function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
   const lang = useContext(LangContext)
 
   return (
-    <div className='flex border border-n-highlight rounded mb-1 me-1 w-60 h-12 text-xl hover:bg-n-highlight select-none' onClick={onClick}
+    <div className='flex border-2 border-n-highlight rounded mb-1 me-1 w-56 h-12 text-xl hover:bg-n-highlight select-none' onClick={onClick}
     style={active ? activeStyle : undefined}>
       <div className='border-e border-n-highlight p-1 font-[KanjiChart] flex items-center'>{k.char}</div>
-      {solved && <div className='p-1 flex items-center line-clamp-1 border-n-highlight border-e w-20'>{roms[0]}</div>}
-      {solved && <div className='p-1 flex items-center text-base flex-1'>{getMeaning(k, lang, true)[0]}</div>}
+      {solved && <div className='p-1 flex items-center line-clamp-1 border-n-highlight border-e w-[4.25rem]'>{roms[0]}</div>}
+      {solved && <div lang={lang} className='p-1 flex items-center text-base flex-1 hyphens-auto min-w-0'>{getMeaning(k, lang, true)[0]}</div>}
     </div>
   )
 }

@@ -1,4 +1,5 @@
-import { RefObject, useEffect, useState } from "react"
+import { RefObject, useContext, useEffect, useState } from "react"
+import { LangContext } from "./Utils"
 
 interface AutoSuggestionProps {
   onChange: (e: HTMLInputElement, force?: boolean) => void
@@ -20,6 +21,8 @@ export function AutoSuggestion({ onChange, className, words, minChars, aRef, fil
   function getSuggestion(start: string) {
     return start.length >= minChars ? words.reduce((p, c) => start && c.toLowerCase().startsWith(start.toLowerCase()) && (!p || c.length < p.length) ? c : p, "") : ""
   }
+
+  const lang = useContext(LangContext)
 
   return (<div className={`relative text-lg h-10 align-left inline-block ${className}`} style={{width: rest.width}}>
     <input
@@ -44,7 +47,7 @@ export function AutoSuggestion({ onChange, className, words, minChars, aRef, fil
       ref={aRef}
       {...rest}
     />
-    <span className="absolute left-0 m-1 break-all select-none text-highlight">
+    <span lang={lang} className="absolute left-0 m-1 hyphens-auto select-none text-highlight">
       {suggestion}
     </span>
   </div>)

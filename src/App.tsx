@@ -54,10 +54,10 @@ function LevelButton({ variant, onClick, children, checked }: { variant: 'left' 
   )
 }
 
-function QuizRangeButton({ onClick, children}: {onClick?: () => void, children: any}) {
+function QuizRangeButton({ onClick, children, active}: {onClick?: () => void, children: any, active: boolean}) {
   return (
     <button
-      className='m-1 p-1 w-40 border rounded-sm bg-n-accent border-n-highlight hover:bg-n-highlight'
+      className={`m-1 p-1 w-40 border-2 rounded bg-n-accent hover:bg-n-highlight ${active ? "border-highlight" : "border-n-highlight"}`}
       onClick={onClick}
     >
       {children}
@@ -71,9 +71,10 @@ interface ListScreenProps {
   level: Level
   setLevel: (x: Level) => void
   setLang: (l: Lang) => void
+  index?: number
 }
 
-function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang }: ListScreenProps) {
+function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListScreenProps) {
   const allLevels: Level[] = ["N5", "N4", "N3", "N2", "N1"]
   const kanjiRange = jlpt[level]
   const [custom, setCustom] = useState(false)
@@ -118,8 +119,9 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang }: ListScreenPr
         </div>
         {
           ranges.map(([a, b]) =>
-            <QuizRangeButton onClick={() => setQuiz({
-              kanji: kanjiRange.slice(a, b)
+            <QuizRangeButton active={a == index} onClick={() => setQuiz({
+              kanji: kanjiRange.slice(a, b),
+              index: a
             })}>{a+1}-{b}</QuizRangeButton>
           )
         }
@@ -132,14 +134,14 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang }: ListScreenPr
             if (e.key == 'Enter') {
               const chars = (e.target as HTMLTextAreaElement).value.split("")
               const jlptKanji = Object.values<Kanji[]>(jlpt).reduce((x, y) => x.concat(y))
-              const kanji = chars.map(c => jlptKanji.find(k => k.char == c) as Kanji).filter(x => x)
+              const kanji = Array.from(new Set(chars.map(c => jlptKanji.find(k => k.char == c) as Kanji).filter(x => x)))
               if (kanji.length > 0) {
-                setQuiz({ kanji })
+                setQuiz({ kanji, index: -1 })
               }
               setCustom(false)
             }
           }}/>
-          : <QuizRangeButton onClick={() => setCustom(true)}>Custom</QuizRangeButton>
+          : <QuizRangeButton active={index == -1}  onClick={() => setCustom(true)}>Custom</QuizRangeButton>
         }
       </div>
     </div>
@@ -168,6 +170,7 @@ function ListScreen({level}: {level: Level}) {
 
 type QuizParams = {
   kanji: Kanji[]
+  index?: number
 }
 
 function App() {
@@ -195,9 +198,10 @@ function App() {
               level={level}
               setLevel={setLevel}
               setLang={setLang}
+              index={quizParams?.index}
             />
           </div>
-          <div className='w-full'>
+          <div className='w-full min-w-0'>
             { quizParams == null
             ? <ListScreen level={level} />
             : <QuizScreen level={level} kanjiRange={quizParams.kanji}/>
