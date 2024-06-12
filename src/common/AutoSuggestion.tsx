@@ -1,5 +1,5 @@
 import { RefObject, useContext, useEffect, useState } from "react"
-import { LangContext } from "./Utils"
+import { LangContext } from "../Utils"
 
 interface AutoSuggestionProps {
   onChange: (e: HTMLInputElement, force?: boolean) => void

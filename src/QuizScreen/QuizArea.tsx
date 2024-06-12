@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, memo, KeyboardEvent, useContext } from "react"
-import KanjiCard from "../KanjiCard"
-import Tile from "../Tile"
+import KanjiCard from "../common/KanjiCard"
+import Tile from "../common/Tile"
 import Inputs, { InputData } from "./Inputs"
 import { getMeaning } from "./QuizScreen"
 import krad from '../assets/kradfile.json'

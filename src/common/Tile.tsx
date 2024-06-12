@@ -1,5 +1,5 @@
 import { CSSProperties } from "react"
-import { useTheme } from "./theme"
+import { useTheme } from "../theme"
 
 type TileProps = {
   kanji: string

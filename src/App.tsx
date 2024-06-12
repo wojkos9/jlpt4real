@@ -1,9 +1,9 @@
 import { useEffect, useState, KeyboardEvent, createContext, useContext } from 'react'
 import jlpt from './jlpt'
 import QuizScreen from './QuizScreen/QuizScreen'
-import Tile from './Tile'
+import Tile from './common/Tile'
 import { useTheme, ThemeProvider, themes, themeNeutral, Theme, applyTheme } from './theme'
-import KanjiCard from './KanjiCard'
+import KanjiCard from './common/KanjiCard'
 import { Toggle } from './common/Toggle'
 import { LangContext } from './Utils'
 

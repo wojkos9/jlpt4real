@@ -1,8 +1,8 @@
 import { ReactElement, useContext } from 'react'
-import jlpt from './jlpt'
-import { themeNeutral, themes } from './theme'
-import { getMeaning } from './QuizScreen/QuizScreen'
-import { LangContext } from './Utils'
+import jlpt from '../jlpt'
+import { themeNeutral, themes } from '../theme'
+import { getMeaning } from '../QuizScreen/QuizScreen'
+import { LangContext } from '../Utils'
 
 function getLevel(k: string) {
   const lvls: Level[] = ["N5", "N4", "N3", "N2", "N1"]

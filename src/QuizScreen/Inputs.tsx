@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, memo } from "react"
-import { AutoSuggestion } from "../AutoSuggestion"
+import { AutoSuggestion } from "../common/AutoSuggestion"
 import { rotArray } from "../Utils"
 
 export interface InputData {
