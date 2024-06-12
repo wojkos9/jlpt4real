@@ -1,43 +1,11 @@
-import { useEffect, useState, KeyboardEvent, createContext, useContext } from 'react'
+import { useEffect, useState, KeyboardEvent, useContext } from 'react'
 import jlpt from './jlpt'
 import QuizScreen from './QuizScreen/QuizScreen'
-import Tile from './common/Tile'
 import { useTheme, ThemeProvider, themes, themeNeutral, Theme, applyTheme } from './theme'
-import KanjiCard from './common/KanjiCard'
 import { Toggle } from './common/Toggle'
 import { LangContext } from './Utils'
+import ListScreen from './ListScreen/ListScreen'
 
-type ContentProps = {
-  level: Level
-  setKanji: (k: Kanji) => void
-  currentKanji?: string
-  isQuiz: boolean
-}
-
-function Content({level, setKanji, currentKanji, isQuiz}: ContentProps) {
-  const ROW_LENGTH = 28
-  const rows = []
-  const data = jlpt[level]
-  for (let i = 0; i < data.length; i += ROW_LENGTH) {
-    rows.push(
-      <div className={`${isQuiz ? 'hover:bg-gray-300 cursor-pointer' : ''}`}>
-        {data.slice(i, i + ROW_LENGTH).map((k, j) =>
-          <Tile
-            size={12}
-            className="m-[2px]"
-            kanji={k.char}
-            isOdd={j % 2 == (i / ROW_LENGTH) % 2}
-            onClick={() => setKanji(k)}
-            current={k.char == currentKanji}
-          />
-        )}
-      </div>
-    )
-  }
-  return (
-    <div className='flex-wrap'>{rows}</div>
-  )
-}
 
 function LevelButton({ variant, onClick, children, checked }: { variant: 'left' | 'right' | 'normal', onClick: () => void, children: any, checked: boolean }) {
   const borderRadius = variant == 'left' ? 'rounded-s-md' : variant == 'right' ? 'rounded-e-md' : ''
@@ -144,26 +112,6 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
           : <QuizRangeButton active={index == -1}  onClick={() => setCustom(true)}>Custom</QuizRangeButton>
         }
       </div>
-    </div>
-  )
-}
-
-function ListScreen({level}: {level: Level}) {
-  const [kanji, setKanji] = useState<Kanji | null>(jlpt[level][0])
-
-  return (
-    <div className='flex flex-col h-screen'>
-      <div className='overflow-scroll flex-1 min-h-0 bg-surface'>
-        <h1 className='text-xl font-bold my-3'>JLPT Level {level} Kanji List</h1>
-        <div>This kanji list is derived from the pre-2010 Test Content Specification. As of 2010, there is no official kanji list.</div>
-        <Content level={level} setKanji={setKanji} currentKanji={kanji?.char} isQuiz={false} />
-      </div>
-      { kanji
-        ? <div className='flex-1 bg-surface'>
-            <KanjiCard kanji={kanji} />
-          </div>
-        : null
-      }
     </div>
   )
 }
