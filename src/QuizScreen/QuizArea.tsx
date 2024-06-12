@@ -74,7 +74,7 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
   function checkMod(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key == "Tab" && e.type == "keydown") {
       e.preventDefault()
-    } else if (e.key == "ArrowRight") {
+    } else if (e.key == "ArrowLeft") {
       e.preventDefault()
       setHint(e.type == "keydown")
     } else {

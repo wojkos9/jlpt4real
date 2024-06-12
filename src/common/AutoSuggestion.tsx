@@ -36,7 +36,7 @@ export function AutoSuggestion({ onChange, className, words, minChars, aRef, fil
         onChange?.(e.target)
       }}
       onKeyDown={e => {
-        if (e.key == "Tab" && suggestion.length) {
+        if ((e.key == "Tab" || e.key == "ArrowRight") && suggestion.length) {
           e.preventDefault();
           (e.target as HTMLInputElement).value = suggestion
           onChange?.(e.target as HTMLInputElement)
