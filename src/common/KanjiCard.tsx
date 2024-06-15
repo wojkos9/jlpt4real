@@ -3,6 +3,7 @@ import jlpt from '../jlpt'
 import { themeNeutral, themes } from '../theme'
 import { getMeaning } from '../QuizScreen/QuizScreen'
 import { LangContext } from '../Utils'
+import cangjie from '../cangjie'
 
 function getLevel(k: string) {
   const lvls: Level[] = ["N5", "N4", "N3", "N2", "N1"]
@@ -47,6 +48,7 @@ export default function KanjiCard({ kanji, onlyMeta }: { kanji: Kanji, onlyMeta?
         <div className='text-8xl text-center font-[KanjiChart] bg-accent'>{kanji.char}</div>
         }
         <div className="my-2">
+          <div>{cangjie[kanji.char]?.join("/")?.toUpperCase() ?? "-"}</div>
           <div>{kanji.on.join(", ")}</div>
           <div>{kanji.kun.join(", ")}</div>
         </div>

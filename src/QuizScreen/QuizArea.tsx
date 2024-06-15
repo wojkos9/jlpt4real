@@ -8,6 +8,8 @@ import jlpt from '../jlpt'
 import { themes } from "../theme"
 import { LangContext, allRom, getOn } from "../Utils"
 import { Toggle } from "../common/Toggle"
+import cangjie from '../cangjie'
+import { AutoSuggestion } from "../common/AutoSuggestion"
 
 interface JLPTKanji extends Kanji {
   level: Level
@@ -37,6 +39,7 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
   const [similar, setSimilar] = useState<JLPTKanji[]>([])
   const [hint, setHint] = useState(false)
   const [reveal, setReveal] = useState(false)
+  const [kanjiMode, setKanjiMode] = useState(false)
 
   useEffect(() => {
     if (radicals.length) {
@@ -57,6 +60,8 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
       setSimilar(similarKanji.reverse())
     }
   }, [radicals])
+
+  useEffect(() => setKanjiMode(false), [kanji])
 
   useEffect(() => {
     setRadicals([])
@@ -90,21 +95,43 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
     }
   }
 
+  function onMainComplete() {
+    setKanjiMode(true)
+  }
+
   return (
-    <div className='flex items-center gap-4'>
-      <div className='flex h-14 flex-col flex-wrap-reverse'>
-        {
+    <div className='flex items-center'>
+      <div className='flex h-14 flex-col flex-wrap-reverse mx-4'>
+        { !kanjiMode &&
           krad[kanji.char as keyof typeof krad].map(r => (
             <Tile key={r} kanji={r} size={7} current={radicals.includes(r)} onClick={() => toggleRadical(r)}/>
           ))
         }
       </div>
-      <Tile kanji={kanji.char} size={14} />
-      <div onKeyDown={checkMod} onKeyUp={checkMod}>
-        <Inputs data={data} onComplete={nextKanji} />
+      {/* <div className="w-16 text-center">
+        { cangjie[kanji.char]?.join("/")?.toUpperCase() ?? "-" }
+      </div> */}
+      <div onKeyDown={checkMod} onKeyUp={checkMod} className="inline-flex items-center">
+        <div className="mx-4">
+        { !kanjiMode
+          ? <Tile kanji={kanji.char} size={14} />
+          : <input
+              type='text'
+              className="border-2 m-1 rounded-lg border-highlight bg-transparent w-12 h-12 text-5xl text-center"
+              autoFocus
+              onInput={e => {e.target.style.width = ""; e.target.style.width = e.target.scrollWidth + 'px'}}
+              onChange={e => {
+                if (e.target.value == kanji.char) {
+                  nextKanji()
+                }
+              }}
+            />
+        }
+        </div>
+        <Inputs data={data} onComplete={onMainComplete} />
       </div>
-      <button className='bg-n-accent border border-n-highlight p-1 rounded' onClick={shuffle}>Random</button>
-      <div className="flex items-center gap-2">
+      <button className='bg-n-accent border border-n-highlight p-1 px-2 rounded mx-4' onClick={shuffle}>Random</button>
+      <div className="flex items-center gap-2 mx-4">
         <Toggle on={reveal} onChange={(c) => setReveal(c)} />
         <a className={`text-lg select-none ${reveal ? 'text-highlight' : ''}`}>reveal</a>
       </div>

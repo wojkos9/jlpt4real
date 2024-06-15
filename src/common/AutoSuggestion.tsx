@@ -2,24 +2,28 @@ import { RefObject, useContext, useEffect, useState } from "react"
 import { LangContext } from "../Utils"
 
 interface AutoSuggestionProps {
-  onChange: (e: HTMLInputElement, force?: boolean) => void
-  className: string
-  words: string[]
-  minChars: number
-  aRef: RefObject<HTMLInputElement>
-  filledIn: boolean
-  width: string
+  onChange?: (e: HTMLInputElement, force?: boolean) => void
+  className?: string
+  words?: string[]
+  minChars?: number
+  aRef?: RefObject<HTMLInputElement>
+  filledIn?: boolean
+  width?: string
 }
 
-export function AutoSuggestion({ onChange, className, words, minChars, aRef, filledIn, ...rest }: AutoSuggestionProps) {
+export function AutoSuggestion({ onChange, className, words: _words, minChars, aRef, filledIn, ...rest }: AutoSuggestionProps) {
   const [suggestion, setSuggestion] = useState("")
+
+  const words = _words ?? []
 
   useEffect(() => {
     setSuggestion(filledIn ? words[0] : "")
   }, [filledIn])
 
   function getSuggestion(start: string) {
-    return start.length >= minChars ? words.reduce((p, c) => start && c.toLowerCase().startsWith(start.toLowerCase()) && (!p || c.length < p.length) ? c : p, "") : ""
+    return (minChars != null && start.length >= minChars)
+      ? words.reduce((p, c) => start && c.toLowerCase().startsWith(start.toLowerCase()) && (!p || c.length < p.length) ? c : p, "")
+      : ""
   }
 
   const lang = useContext(LangContext)
