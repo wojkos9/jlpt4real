@@ -8,21 +8,12 @@ import jlpt from '../jlpt'
 import { themes } from "../theme"
 import { LangContext, allRom, getOn } from "../Utils"
 import { Toggle } from "../common/Toggle"
+import groups from '../assets/groups.json'
+import { SimilarRow } from "../common/SimilarRow"
 
-interface JLPTKanji extends Kanji {
-  level: Level
-}
 
-function SimilarRow({ kanji }: { kanji: JLPTKanji }) {
-  const lang = useContext(LangContext)
-  return (
-    <tr className='text-nowrap'>
-      <td style={{backgroundColor: themes[kanji.level].highlight}}>{kanji.char}</td>
-      <td className='px-2'>{kanji.on[0]}</td>
-      <td className='px-2'>{getMeaning(kanji, lang).join(", ")}</td>
-    </tr>
-  )
-}
+
+
 
 interface QuizAreaProps {
   kanji: Kanji
@@ -37,6 +28,7 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
   const [similar, setSimilar] = useState<JLPTKanji[]>([])
   const [hint, setHint] = useState(false)
   const [reveal, setReveal] = useState(false)
+  const [showSimilar, setShowSimilar] = useState(false)
 
   useEffect(() => {
     if (radicals.length) {
@@ -82,21 +74,38 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
     }
   }
 
-  function toggleRadical(r: string) {
-    if (radicals.includes(r)) {
-      setRadicals(radicals.filter(e => e != r))
-    } else {
-      setRadicals([...radicals, r])
+  const group = useMemo(() =>
+    Object.entries(groups).find(([g, k]) => g != "x" && k.includes(kanji.char))
+      ?.[0] as keyof typeof groups | null
+  , [kanji])
+
+  useEffect(() => {
+    if (similar.length > 0) {
+      setSimilar([])
+      return
     }
-  }
+    let similarChars = group ? groups[group]?.split("")?.filter(k => k != kanji.char) : []
+
+    const similarKanji: JLPTKanji[] = []
+    const levels: Level[] = ["N5", "N4", "N3", "N2", "N1"]
+    for (const lvl of levels) {
+      for (const k of jlpt[lvl]) {
+        if (similarChars.includes(k.char)) {
+          similarKanji.push({...k, level: lvl})
+          similarChars = similarChars.filter(c => c != k.char)
+        }
+      }
+    }
+    setSimilar(similarKanji.reverse())
+  }, [group])
 
   return (
-    <div className='flex items-center gap-4'>
-      <div className='flex h-14 flex-col flex-wrap-reverse'>
+    <div className='flex justify-center gap-4'>
+      <div className='flex h-14 items-center flex-col flex-wrap-reverse gap-2'>
         {
-          krad[kanji.char as keyof typeof krad].map(r => (
-            <Tile key={r} kanji={r} size={7} current={radicals.includes(r)} onClick={() => toggleRadical(r)}/>
-          ))
+          group
+            ? <Tile kanji={group} size={12} current={similar.length > 0} onClick={() => setShowSimilar(!showSimilar)} />
+            : <Tile kanji={"?"} size={12} />
         }
       </div>
       <Tile kanji={kanji.char} size={14} />
@@ -112,7 +121,7 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
         <div className='absolute top-14 rounded-md bg-surface border-2 p-1 border-highlight'>
         <KanjiCard kanji={kanji} onlyMeta />
       </div> }
-      { radicals.length > 0 &&
+      { showSimilar &&
         <div className='absolute top-14 rounded-md bg-surface border-2 p-1 border-highlight max-h-96 overflow-scroll'>
           <table>
           {similar.map(s => <SimilarRow key={s.char} kanji={s}/>)}

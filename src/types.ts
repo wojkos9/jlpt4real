@@ -15,6 +15,10 @@ type Kanji = {
   compound: Compound[]
 }
 
+interface JLPTKanji extends Kanji {
+  level: Level
+}
+
 type Lang = "pl" | "en"
 
 declare module 'kuroshiro' {
