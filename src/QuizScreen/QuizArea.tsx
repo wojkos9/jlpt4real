@@ -6,7 +6,7 @@ import { getMeaning } from "./QuizScreen"
 import krad from '../assets/kradfile.json'
 import jlpt from '../jlpt'
 import { themes } from "../theme"
-import { LangContext, allRom, getOn } from "../Utils"
+import { LangContext, allRom, getOn, rotArray } from "../Utils"
 import { Toggle } from "../common/Toggle"
 import groups from '../assets/groups.json'
 import { SimilarRow } from "../common/SimilarRow"
@@ -21,14 +21,14 @@ interface QuizAreaProps {
   nextKanji: () => void
   handleKey: (e: KeyboardEvent) => void
   updateReveal: (reveal: boolean) => void
+  level: Level
 }
 
-function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAreaProps) {
+function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal, level }: QuizAreaProps) {
   const [radicals, setRadicals] = useState<string[]>([])
   const [similar, setSimilar] = useState<JLPTKanji[]>([])
-  const [hint, setHint] = useState(false)
+  const [hintKanji, setHintKanji] = useState<Kanji | null>(null)
   const [reveal, setReveal] = useState(false)
-  const [showSimilar, setShowSimilar] = useState(false)
 
   useEffect(() => {
     if (radicals.length) {
@@ -52,7 +52,8 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
 
   useEffect(() => {
     setRadicals([])
-  }, [kanji, hint])
+    setHintKanji(null)
+  }, [kanji])
 
   useEffect(() => updateReveal(reveal), [reveal])
 
@@ -63,12 +64,29 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
     { options: getMeaning(kanji, lang), width: "8rem", autosuggestion: true }
   ], [kanji, lang])
 
+  function nextSimilar(dir: 1 | -1) {
+    const allSimilar = [...similar, kanji]
+    const current = hintKanji ? allSimilar.findIndex(k => k.char == hintKanji.char) :
+      dir == 1 ? -1 : allSimilar.length
+    const next = rotArray(allSimilar, () => true, current, dir)
+    setHintKanji(allSimilar[next])
+  }
+
   function checkMod(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key == "Tab" && e.type == "keydown") {
       e.preventDefault()
     } else if (e.key == "ArrowLeft") {
       e.preventDefault()
-      setHint(e.type == "keydown")
+      setHintKanji(e.type == "keydown" ? kanji : null)
+    } else if (e.type == "keydown" && !e.altKey && e.key == "3") {
+      e.preventDefault()
+      nextSimilar(1)
+    } else if (e.type == "keydown" && !e.altKey && e.key == "1") {
+      e.preventDefault()
+      nextSimilar(-1)
+    } else if (e.type == "keydown" && !e.altKey && e.key == "2") {
+      e.preventDefault()
+      setHintKanji(hintKanji ? null : kanji)
     } else {
       handleKey(e)
     }
@@ -80,10 +98,6 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
   , [kanji])
 
   useEffect(() => {
-    if (similar.length > 0) {
-      setSimilar([])
-      return
-    }
     let similarChars = group ? groups[group]?.split("")?.filter(k => k != kanji.char) : []
 
     const similarKanji: JLPTKanji[] = []
@@ -96,37 +110,57 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAr
         }
       }
     }
-    setSimilar(similarKanji.reverse())
+    setSimilar(similarKanji)
   }, [group])
 
-  return (
-    <div className='flex justify-center gap-4'>
-      <div className='flex h-14 items-center flex-col flex-wrap-reverse gap-2'>
-        {
-          group
-            ? <Tile kanji={group} size={12} current={similar.length > 0} onClick={() => setShowSimilar(!showSimilar)} />
-            : <Tile kanji={"?"} size={12} />
+  function Similars() {
+    const elems = []
+    let isBefore = true
+    const kIndex = jlpt[level].findIndex(k => k.char == kanji.char)
+    const sep = <div className="w-2 h-2 bg-highlight"/>
+    for (const s of similar) {
+      if (isBefore && s.level[1] <= level[1]) {
+        const sIndex = jlpt[level].findIndex(k => k.char == s.char)
+        if (s.level[1] < level[1] || sIndex > kIndex) {
+          elems.push(sep)
+          isBefore = false
         }
+      }
+      elems.push(
+        <Tile
+          size={10}
+          kanji={s.char}
+          current={hintKanji?.char == s.char}
+          level={s.level}
+          className="border-4" />
+      )
+    }
+    if (isBefore && elems.length > 0) {
+      elems.push(sep)
+    }
+    return elems
+  }
+
+  return (
+    <div className='flex gap-4 w-full'>
+      <div className='w-1/3 flex h-14 items-center gap-1 flex-row flex-wrap justify-end'>
+        <Similars />
       </div>
-      <Tile kanji={kanji.char} size={14} />
-      <div onKeyDown={checkMod} onKeyUp={checkMod}>
-        <Inputs data={data} onComplete={nextKanji} />
-      </div>
-      <button className='bg-n-accent border border-n-highlight p-1 rounded' onClick={shuffle}>Random</button>
-      <div className="flex items-center gap-2">
-        <Toggle on={reveal} onChange={(c) => setReveal(c)} />
-        <a className={`text-lg select-none ${reveal ? 'text-highlight' : ''}`}>reveal</a>
-      </div>
-      { hint &&
-        <div className='absolute top-14 rounded-md bg-surface border-2 p-1 border-highlight'>
-        <KanjiCard kanji={kanji} onlyMeta />
-      </div> }
-      { showSimilar &&
-        <div className='absolute top-14 rounded-md bg-surface border-2 p-1 border-highlight max-h-96 overflow-scroll'>
-          <table>
-          {similar.map(s => <SimilarRow key={s.char} kanji={s}/>)}
-          </table>
-      </div> }
+      <div className='w-2/3 flex-shrink-0 flex items-center gap-4'>
+        <Tile kanji={kanji.char} size={14} current={hintKanji == kanji} />
+        <div onKeyDown={checkMod} onKeyUp={checkMod}>
+          <Inputs data={data} onComplete={nextKanji} />
+        </div>
+        <button className='bg-n-accent border border-n-highlight p-1 rounded h-10' onClick={shuffle}>Random</button>
+        <div className="flex items-center gap-2">
+          <Toggle on={reveal} onChange={(c) => setReveal(c)} />
+          <a className={`text-lg select-none ${reveal ? 'text-highlight' : ''}`}>reveal</a>
+        </div>
+        { hintKanji &&
+          <div className='absolute top-16 rounded-md bg-surface border-2 p-1 border-highlight'>
+          <KanjiCard kanji={hintKanji} onlyMeta />
+        </div> }
+        </div>
     </div>
   )
 }

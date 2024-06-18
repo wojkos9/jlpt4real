@@ -136,6 +136,7 @@ export default function QuizScreen({ kanjiRange, level }: QuizScreenProps) {
     <div className='h-screen flex flex-col items-center bg-surface'>
       <QuizArea
         kanji={kanji}
+        level={level}
         shuffle={shuffle}
         nextKanji={nextKanji}
         handleKey={handleKey}

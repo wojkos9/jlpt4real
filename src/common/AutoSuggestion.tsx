@@ -33,13 +33,13 @@ export function AutoSuggestion({ onChange, className, words, minChars, aRef, fil
           (e.target as HTMLInputElement).value = s.substring(0, e.target!.value.length)
         }
         setSuggestion(s)
-        onChange?.(e.target)
+        onChange?.(e.target, true)
       }}
       onKeyDown={e => {
         if ((e.key == "Tab" || e.key == "ArrowRight") && suggestion.length) {
           e.preventDefault();
           (e.target as HTMLInputElement).value = suggestion
-          onChange?.(e.target as HTMLInputElement)
+          onChange?.(e.target as HTMLInputElement, true)
         } else if (e.key == "Enter") {
           onChange?.(e.target as HTMLInputElement, true)
         }

@@ -1,32 +1,33 @@
-import { CSSProperties } from "react"
-import { useTheme } from "../theme"
+import { CSSProperties, HTMLAttributes } from "react"
+import { themes, useTheme } from "../theme"
 
-type TileProps = {
+interface TileProps extends HTMLAttributes<HTMLDivElement> {
   kanji: string
   isOdd?: boolean
   onClick?: () => void
   onMouseOver?: () => void
   current?: boolean
   size: number
-  className?: string
+  level?: Level
 }
 
-export default function Tile({ kanji, isOdd, onClick, onMouseOver, current, size, className }: TileProps) {
+export default function Tile({ kanji, isOdd, current, size, level, className, style, ...rest }: TileProps) {
   const wh = Math.round(size / 4 * 100) / 100
   const fs = (wh - 0.5) / 2.5 * 42
   const theme = useTheme()
+  const tileTheme = level ? themes[level] : theme
   return (
       <div
         className={`inline-flex flex-col justify-center items-center p-1 cursor-pointer font-[KanjiChart] border-2 border-n-highlight rounded-lg transition duration-300 hover:shadow-[0_0_8px_rgba(0,0,0,0.6)] ${className}`}
         style={{
           backgroundColor: (isOdd ? theme.accent : undefined),
-          borderColor: current ? theme.highlight : undefined,
+          borderColor: current ? tileTheme.highlight : undefined,
           width: `${wh}rem`,
           height: `${wh}rem`,
-          fontSize: `${fs}px`
+          fontSize: `${fs}px`,
+          ...style
         }}
-        onClick={onClick}
-        onMouseOver={onMouseOver}
+        {...rest}
       >
         {kanji}
     </div>
