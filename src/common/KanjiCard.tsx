@@ -39,15 +39,23 @@ function KanjiCompound({ compound }: {compound: Compound}) {
     )
   }
 
-export default function KanjiCard({ kanji, onlyMeta }: { kanji: Kanji, onlyMeta?: boolean }) {
-  const lang = useContext(LangContext)
+type Compound2 = {
+  kanji: string
+  kana: string
+  meaning: string[]
+}
 
+export default function KanjiCard({ kanji, onlyMeta, comp }: { kanji: Kanji, onlyMeta?: boolean, comp?: Compound2 }) {
+  const lang = useContext(LangContext)
     return (
       <div className='px-4'>
         <div className='text-xl m-1'>{getMeaning(kanji, lang).join(", ")}</div>
         { !onlyMeta &&
         <div className='text-8xl text-center font-[KanjiChart] bg-accent'>{kanji.char}</div>
         }
+        <div>
+          { comp ? `${comp.kanji} - ${comp.kana} ${comp.meaning.slice(0, 3).join(", ")}` : "" }
+        </div>
         <div className="mt-2">
           <div>{kanji.on.join(", ")}</div>
           <div>{kanji.kun.join(", ")}</div>

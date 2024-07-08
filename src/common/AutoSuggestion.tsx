@@ -15,6 +15,10 @@ export function AutoSuggestion({ onChange, className, words, minChars, aRef, fil
   const [suggestion, setSuggestion] = useState("")
 
   useEffect(() => {
+    setSuggestion("")
+  }, [words])
+
+  useEffect(() => {
     setSuggestion(filledIn ? words[0] : "")
   }, [filledIn])
 
@@ -33,13 +37,13 @@ export function AutoSuggestion({ onChange, className, words, minChars, aRef, fil
           (e.target as HTMLInputElement).value = s.substring(0, e.target!.value.length)
         }
         setSuggestion(s)
-        onChange?.(e.target, true)
+        onChange?.(e.target, false)
       }}
       onKeyDown={e => {
         if ((e.key == "Tab" || e.key == "ArrowRight") && suggestion.length) {
           e.preventDefault();
           (e.target as HTMLInputElement).value = suggestion
-          onChange?.(e.target as HTMLInputElement, true)
+          onChange?.(e.target as HTMLInputElement, false)
         } else if (e.key == "Enter") {
           onChange?.(e.target as HTMLInputElement, true)
         }

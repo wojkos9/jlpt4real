@@ -5,6 +5,8 @@ import { useTheme, ThemeProvider, themes, themeNeutral, Theme, applyTheme } from
 import { Toggle } from './common/Toggle'
 import { LangContext } from './Utils'
 import ListScreen from './ListScreen/ListScreen'
+import groups from './assets/groups.json'
+import Tile from './common/Tile'
 
 
 function LevelButton({ variant, onClick, children, checked }: { variant: 'left' | 'right' | 'normal', onClick: () => void, children: any, checked: boolean }) {
@@ -36,28 +38,21 @@ function QuizRangeButton({ onClick, children, active}: {onClick?: () => void, ch
 interface ListScreenProps {
   setTheme: (x: Theme) => void
   setQuiz: (q: QuizParams | null) => void
-  level: Level
-  setLevel: (x: Level) => void
+  level: Route
+  setLevel: (x: Route) => void
   setLang: (l: Lang) => void
   index?: number
 }
 
 function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListScreenProps) {
   const allLevels: Level[] = ["N5", "N4", "N3", "N2", "N1"]
-  const kanjiRange = jlpt[level]
+  const kanjiRange = level in jlpt ? jlpt[level] : []
   const [custom, setCustom] = useState(false)
 
   const quizRange = 100
   const ranges: [number, number][] = []
   for (let i = 0; i < kanjiRange.length; i += quizRange) {
     let next = Math.min(i + quizRange, kanjiRange.length)
-    // const kanjiLeft = kanjiRange.length - i
-    // if (quizRange < kanjiLeft && kanjiLeft < 2 * quizRange) {
-    //   const halfKanji = Math.floor(kanjiLeft / 2)
-    //   ranges.push([i, i + halfKanji])
-    //   ranges.push([i + halfKanji + 1, kanjiRange.length])
-    //   break
-    // }
     ranges.push([i, next])
   }
 
@@ -66,7 +61,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
   const langInactive = ""
 
   return (
-    <div>
+    <div className='w-[260px] h-screen border-r-2 border-r-highlight me-2 overflow-clip'>
       <div className='text-center text-sm m-1'>level</div>
       <div className='flex justify-center flex-nowrap'>
         {allLevels.map((name, i) => (
@@ -80,6 +75,10 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
         ))}
       </div>
       <div className='flex flex-col m-1 items-center'>
+        <LevelButton checked={level == "groups"} variant="normal" onClick={() => {
+          setLevel("groups")
+          setTheme(themes["N5"])
+        }}>Groups</LevelButton>
         <div className='flex items-center gap-2 m-1'>
           <a className={lang == 'pl' ? langActive : langInactive}>PL</a>
             <Toggle on={lang == 'en'} onChange={c => setLang(c ? "en" : "pl")} />
@@ -121,11 +120,42 @@ type QuizParams = {
   index?: number
 }
 
+const levelsMap = Object.fromEntries(
+  Object.entries(jlpt).map(([l, ks]) => ks.map(k => [k.char, l]))
+  .reduce((x, y) => x.concat(y))
+)
+
+function GroupRow({ group }: { group: keyof typeof groups }) {
+  return (
+    <div>
+      {
+        (groups[group] as string).split("").map(k => (
+          <Tile current level={levelsMap[k]} size={10} kanji={k} />
+        ))
+      }
+    </div>
+  )
+}
+
+function GroupsScreen() {
+  return (
+    <div>
+      {
+        Object.keys(groups).map(g =>
+          <GroupRow group={g} />
+        )
+      }
+    </div>
+  )
+}
+
+type Route = Level | "groups"
+
 function App() {
-  const [level, setLevel] = useState<Level>("N4")
+  const [level, setLevel] = useState<Route>("N4")
   const [theme, setTheme] = useState({...themeNeutral, ...themes["N4"]})
   const [quizParams, setQuizParams] = useState<QuizParams | null>(null)
-  const [lang, setLang] = useState<Lang>("pl")
+  const [lang, setLang] = useState<Lang>("en")
 
   function setThemePartial(theme: Theme) {
     setTheme({...themeNeutral, ...theme})
@@ -139,19 +169,17 @@ function App() {
     <ThemeProvider theme={theme}>
       <LangContext.Provider value={lang}>
         <div className='flex h-screen bg-surface overflow-x-scroll'>
-          <div className='w-[260px] h-screen'>
-            <LeftPanel
-              setTheme={setThemePartial}
-              setQuiz={setQuizParams}
-              level={level}
-              setLevel={setLevel}
-              setLang={setLang}
-              index={quizParams?.index}
-            />
-          </div>
+          <LeftPanel
+            setTheme={setThemePartial}
+            setQuiz={setQuizParams}
+            level={level}
+            setLevel={setLevel}
+            setLang={setLang}
+            index={quizParams?.index}
+          />
           <div className='w-full min-w-0'>
             { quizParams == null
-            ? <ListScreen level={level} />
+            ? level == "groups" ? <GroupsScreen /> : <ListScreen level={level} />
             : <QuizScreen level={level} kanjiRange={quizParams.kanji}/>
             }
           </div>

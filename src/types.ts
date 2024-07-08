@@ -13,6 +13,7 @@ type Kanji = {
   on: string[]
   meaning: string[]
   compound: Compound[]
+  rtk: string
 }
 
 interface JLPTKanji extends Kanji {

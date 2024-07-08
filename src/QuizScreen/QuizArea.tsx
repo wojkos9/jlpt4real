@@ -60,8 +60,8 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal, level }:
   const lang = useContext(LangContext)
 
   const data: InputData[] = useMemo(() => [
-    { options: allRom(getOn(kanji)), width: "4rem" },
-    { options: getMeaning(kanji, lang), width: "8rem", autosuggestion: true }
+    { options: getMeaning(kanji, lang), width: "8rem", autosuggestion: 2,  },
+    { options: allRom(getOn(kanji)), width: "4rem" }
   ], [kanji, lang])
 
   function nextSimilar(dir: 1 | -1) {

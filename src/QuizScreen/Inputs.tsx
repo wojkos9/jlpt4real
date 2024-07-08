@@ -5,7 +5,7 @@ import { rotArray } from "../Utils"
 export interface InputData {
   options: string[]
   width: string
-  autosuggestion?: boolean
+  autosuggestion?: number
 }
 interface InputsProps {
   data: InputData[]
@@ -65,7 +65,7 @@ function Inputs({ data, onComplete }: InputsProps) {
   function checkInput(index: number, options: string[], e: HTMLInputElement, force?: boolean) {
     const answer = e.value
     const ans = checkAnswer(options, answer)
-    if (ans == CheckResult.CORRECT_ONE || ans == CheckResult.CORRECT_MANY && force) {
+    if (ans == CheckResult.CORRECT_ONE || ans == CheckResult.CORRECT_MANY && (!options.slice(0, options.indexOf(answer)).some(a => a.startsWith(answer)) || force)) {
       // e.target.value = ""
       onCorrectAnswer(index)
     }
@@ -79,11 +79,11 @@ function Inputs({ data, onComplete }: InputsProps) {
           <AutoSuggestion
             key={i}
             width={d.width}
-            filledIn={d.autosuggestion ? i > 0 && completed[i-1] : false}
+            filledIn={d.autosuggestion == 0 ? i == 0 || completed[i-1] : false}
             className='border-2 m-1 rounded border-highlight'
             words={d.options}
             onChange={onChange}
-            minChars={d.autosuggestion ? 2 : 10}
+            minChars={d.autosuggestion ?? 10}
             aRef={refs[i]} />
         )
 

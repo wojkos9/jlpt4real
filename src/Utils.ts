@@ -39,4 +39,4 @@ export function getOn(k: Kanji) {
   return k.on //.slice(0, 1)
 }
 
-export const LangContext = createContext<Lang>("pl")
+export const LangContext = createContext<Lang>("en")

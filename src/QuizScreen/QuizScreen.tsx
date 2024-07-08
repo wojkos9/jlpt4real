@@ -30,15 +30,16 @@ function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
     <div className='flex border-2 border-n-highlight rounded mb-1 me-1 w-56 h-12 text-xl hover:bg-n-highlight select-none' onClick={onClick}
     style={active ? activeStyle : undefined}>
       <div className='border-e border-n-highlight p-1 font-[KanjiChart] flex items-center'>{k.char}</div>
-      {solved && <div className='p-1 flex items-center line-clamp-1 border-n-highlight border-e w-[4.25rem]'>{roms[0]}</div>}
-      {solved && <div lang={lang} className='p-1 flex items-center text-base flex-1 hyphens-auto min-w-0'>{getMeaning(k, lang, true)[0]}</div>}
+      {solved && <div lang={lang} className='p-1 flex items-center text-base flex-1 border-n-highlight border-e hyphens-auto min-w-0'>{getMeaning(k, lang, true)[0]}</div>}
+      {solved && <div className='p-1 flex items-center line-clamp-1 w-[4.25rem]'>{roms[0]}</div>}
     </div>
   )
 }
 
 export function getMeaning(k: Kanji, lang: Lang, single: boolean = false) {
   return lang == "pl" ? trans[k.char as keyof typeof trans].slice(0, single ? 1 : undefined)
-    : (single ? [meaning[k.char as any as keyof typeof meaning]] : k.meaning)
+    : [k.rtk] // + " " + k.meaning]
+  //: (single ? [meaning[k.char as any as keyof typeof meaning]] : k.meaning)
 }
 
 
