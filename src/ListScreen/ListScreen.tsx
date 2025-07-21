@@ -28,10 +28,15 @@ function ListScreen({level}: {level: Level}) {
       tabIndex={0}
       onKeyDown={e => {
         console.log(e)
-        if (e.key == "ArrowRight") {
-          moveKanji(1)
-        } else if (e.key == "ArrowLeft") {
-          moveKanji(-1)
+        const dirs: {[key: string]: number | null} = {
+          "ArrowRight": 1,
+          "ArrowLeft": -1,
+          "ArrowUp": -28,
+          "ArrowDown": 28
+        }
+        const dir = dirs[e.key]
+        if (dir != null) {
+          moveKanji(dir)
         }
       }}
     >
