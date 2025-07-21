@@ -1,7 +1,7 @@
 import Kuroshiro, { System } from "kuroshiro"
 import { createContext } from "react"
 
-export function rotArray<T>(array: T[], predicate: (t: T) => boolean, start: number, dir: 1 | -1 = 1) {
+export function rotArray<T>(array: T[], predicate: (t: T) => boolean, start: number, dir: number = 1) {
   function rot1(i: number) {
     return (i + dir + array.length) % array.length
   }
