@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import KanjiCard from "../common/KanjiCard"
 import jlpt from "../jlpt"
 import KanjiGrid from "./KanjiGrid"
@@ -9,7 +9,11 @@ function ListScreen({level}: {level: Level}) {
   const levelKanji: Kanji[] = jlpt[level]
   const [kanji, setKanji] = useState<Kanji | null>(levelKanji[0])
 
-  function moveKanji(dir: 1 | -1) {
+  useEffect(() => {
+    setKanji(levelKanji[0])
+  }, [level])
+
+  function moveKanji(dir: number) {
     if (kanji == null) {
       return
     }
