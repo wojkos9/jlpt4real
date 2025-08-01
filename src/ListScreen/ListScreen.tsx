@@ -41,8 +41,7 @@ function ListScreen({level}: {level: Level}) {
       }}
     >
       <div className='overflow-scroll flex-1 min-h-0 bg-surface'>
-        <h1 className='text-xl font-bold my-3'>JLPT Level {level} Kanji List</h1>
-        <div>This kanji list is derived from the pre-2010 Test Content Specification. As of 2010, there is no official kanji list.</div>
+        <h1 className='text-xl font-bold my-3'>JLPT Level {level} Kanji List ({levelKanji.length})</h1>
         <KanjiGrid level={level} setKanji={setKanji} currentKanji={kanji?.char} isQuiz={false} />
       </div>
       { kanji

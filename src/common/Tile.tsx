@@ -22,6 +22,7 @@ export default function Tile({ kanji, isOdd, current, size, level, className, st
         style={{
           backgroundColor: (isOdd ? theme.accent : undefined),
           borderColor: current ? tileTheme.highlight : undefined,
+          borderWidth: current ? 3 : undefined,
           width: `${wh}rem`,
           height: `${wh}rem`,
           fontSize: `${fs}px`,

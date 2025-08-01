@@ -16,7 +16,8 @@ function LevelButton({ variant, onClick, children, checked }: { variant: 'left' 
     <button
       className={`outline outline-1 outline-n-highlight py-1 px-3 text-gray-700 font-bold text-sm hover:bg-n-highlight ${borderRadius}`}
       style={{
-        backgroundColor: checked ? theme.highlight : theme.neutral.surface
+        backgroundColor: checked ? theme.highlight : theme.neutral.surface,
+        color: theme.neutral.text
       }}
       onClick={onClick}>
         {children}
@@ -62,7 +63,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
 
   return (
     <div className='w-[260px] h-screen border-r-2 border-r-highlight me-2 overflow-clip'>
-      <div className='text-center text-sm m-1'>level</div>
+      <div className='text-center text-sm m-1 font-bold'>Level</div>
       <div className='flex justify-center flex-nowrap'>
         {allLevels.map((name, i) => (
           <LevelButton checked={name == level} onClick={() => {
@@ -74,12 +75,12 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
           </LevelButton>
         ))}
       </div>
-      <div className='flex flex-col m-1 items-center'>
+      <div className='flex flex-col m-2 items-center'>
         <LevelButton checked={level == "groups"} variant="normal" onClick={() => {
           setLevel("groups")
           setTheme(themes["N5"])
         }}>Groups</LevelButton>
-        <div className='flex items-center gap-2 m-1'>
+        <div className='flex items-center gap-2 m-2'>
           <a className={lang == 'pl' ? langActive : langInactive}>PL</a>
             <Toggle on={lang == 'en'} onChange={c => setLang(c ? "en" : "pl")} />
           <a className={lang == 'en' ? langActive : langInactive} >EN</a>
