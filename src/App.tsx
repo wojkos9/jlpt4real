@@ -7,6 +7,8 @@ import { LangContext } from './Utils'
 import ListScreen from './ListScreen/ListScreen'
 import groups from './assets/groups.json'
 import Tile from './common/Tile'
+import { useQueryParam, QueryParamProvider } from 'use-query-params';
+import { WindowHistoryAdapter } from 'use-query-params/adapters/window'
 
 
 function LevelButton({ variant, onClick, children, checked }: { variant: 'left' | 'right' | 'normal', onClick: () => void, children: any, checked: boolean }) {
@@ -152,11 +154,19 @@ function GroupsScreen() {
 
 type Route = Level | "groups"
 
-function App() {
-  const [level, setLevel] = useState<Route>("N4")
-  const [theme, setTheme] = useState({...themeNeutral, ...themes["N4"]})
+function Content() {
+  const [level = "N5", setLevel] = useQueryParam<Route>("level")
+  const [theme, setTheme] = useState({...themeNeutral, ...themes[level as Level]})
   const [quizParams, setQuizParams] = useState<QuizParams | null>(null)
   const [lang, setLang] = useState<Lang>("en")
+
+  useEffect(() => {
+    if (level == "groups") {
+      document.title = "JLPT Kanji groups"
+    } else {
+      document.title = `JLPT Study ${level}`
+    }
+  }, [level])
 
   function setThemePartial(theme: Theme) {
     setTheme({...themeNeutral, ...theme})
@@ -188,6 +198,12 @@ function App() {
       </LangContext.Provider>
     </ThemeProvider>
   )
+}
+
+function App() {
+  return <QueryParamProvider adapter={WindowHistoryAdapter}>
+    <Content />
+  </QueryParamProvider>
 }
 
 export default App
