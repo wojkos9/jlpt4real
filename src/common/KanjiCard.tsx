@@ -1,4 +1,4 @@
-import { ReactElement, useContext, useMemo } from 'react'
+import { ReactElement, useContext } from 'react'
 import jlpt from '../jlpt'
 import { themeNeutral, themes } from '../theme'
 import { getMeaning } from '../QuizScreen/QuizScreen'

@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback, KeyboardEvent, useContext } f
 import { useTheme } from '../theme'
 import { ArrowsRightLeftIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import trans from '../assets/trans.json'
-import meaning from '../assets/kanji_meaning.json'
 import { allRom, getOn, LangContext, rotArray, splitBy } from '../Utils'
 import QuizArea from './QuizArea'
 

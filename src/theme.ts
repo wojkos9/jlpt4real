@@ -101,8 +101,9 @@ Object.entries(themesDark).map(([k, v]) =>
   }])
 ) as Themes
 
-const themeNeutral = themeNeutralDark
-const themes = themesMono
+const isDark = true
+const themeNeutral = isDark ? themeNeutralDark : themeNeutralLight
+const themes = isDark ? themesMono : themesLight
 
 function mapTheme(theme: ThemeSystem) {
   return {

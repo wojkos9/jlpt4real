@@ -49,7 +49,7 @@ interface ListScreenProps {
 
 function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListScreenProps) {
   const allLevels: Level[] = ["N5", "N4", "N3", "N2", "N1"]
-  const kanjiRange = level in jlpt ? jlpt[level] : []
+  const kanjiRange = level in jlpt ? jlpt[level as Level] : []
   const [custom, setCustom] = useState(false)
 
   const quizRange = 100
@@ -145,7 +145,7 @@ function GroupsScreen() {
     <div>
       {
         Object.keys(groups).map(g =>
-          <GroupRow group={g} />
+          <GroupRow group={g as keyof typeof groups} />
         )
       }
     </div>
@@ -191,7 +191,7 @@ function Content() {
           <div className='w-full min-w-0'>
             { quizParams == null
             ? level == "groups" ? <GroupsScreen /> : <ListScreen level={level} />
-            : <QuizScreen level={level} kanjiRange={quizParams.kanji}/>
+            : <QuizScreen level={level as Level} kanjiRange={quizParams.kanji}/>
             }
           </div>
         </div>

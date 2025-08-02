@@ -1,4 +1,4 @@
-import { CSSProperties, HTMLAttributes } from "react"
+import { HTMLAttributes } from "react"
 import { themes, useTheme } from "../theme"
 
 interface TileProps extends HTMLAttributes<HTMLDivElement> {

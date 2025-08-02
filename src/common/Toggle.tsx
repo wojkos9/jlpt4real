@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
 export function Toggle({ on, onChange }: { on?: boolean, onChange: (c: boolean) => void }) {
   const [checked, setChecked] = useState(on ?? false)

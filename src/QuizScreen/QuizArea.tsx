@@ -1,15 +1,13 @@
-import { useState, useEffect, useMemo, useCallback, memo, KeyboardEvent, useContext } from "react"
+import { useState, useEffect, useMemo, memo, KeyboardEvent, useContext } from "react"
 import KanjiCard from "../common/KanjiCard"
 import Tile from "../common/Tile"
 import Inputs, { InputData } from "./Inputs"
 import { getMeaning } from "./QuizScreen"
 import krad from '../assets/kradfile.json'
 import jlpt from '../jlpt'
-import { themes } from "../theme"
 import { LangContext, allRom, getOn, rotArray } from "../Utils"
 import { Toggle } from "../common/Toggle"
 import groups from '../assets/groups.json'
-import { SimilarRow } from "../common/SimilarRow"
 
 
 
