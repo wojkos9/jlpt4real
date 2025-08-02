@@ -38,7 +38,7 @@ function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
 
 export function getMeaning(k: Kanji, lang: Lang, single: boolean = false) {
   return lang == "pl" ? trans[k.char as keyof typeof trans].slice(0, single ? 1 : undefined)
-    : [k.rtk] // + " " + k.meaning]
+    : k.meaning // + " " + k.meaning]
   //: (single ? [meaning[k.char as any as keyof typeof meaning]] : k.meaning)
 }
 
