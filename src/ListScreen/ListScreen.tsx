@@ -40,12 +40,12 @@ function ListScreen({level}: {level: Level}) {
         }
       }}
     >
-      <div className='overflow-scroll flex-1 min-h-0 bg-surface'>
+      <div className='overflow-scroll flex-1 bg-surface'>
         <h1 className='text-xl font-bold my-3'>JLPT Level {level} Kanji List ({levelKanji.length})</h1>
         <KanjiGrid level={level} setKanji={setKanji} currentKanji={kanji?.char} isQuiz={false} />
       </div>
       { kanji
-        ? <div className='flex-1 bg-surface'>
+        ? <div className='flex-1 min-h-0 overflow-scroll bg-surface'>
             <KanjiCard kanji={kanji} />
           </div>
         : null

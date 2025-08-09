@@ -51,6 +51,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
   const allLevels: Level[] = ["N5", "N4", "N3", "N2", "N1"]
   const kanjiRange = level in jlpt ? jlpt[level as Level] : []
   const [custom, setCustom] = useState(false)
+  const [expanded, setExpanded] = useState(false)
 
   const quizRange = 100
   const ranges: [number, number][] = []
@@ -63,10 +64,10 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
   const langActive = "text-highlight"
   const langInactive = ""
 
-  return (
-    <div className='w-[260px] h-screen border-r-2 border-r-highlight me-2 overflow-clip'>
+  function PanelContent() {
+    return <>
       <div className='text-center text-sm m-1 font-bold'>Level</div>
-      <div className='flex justify-center flex-nowrap'>
+      <div className='flex justify-center flex-nowrap mx-2'>
         {allLevels.map((name, i) => (
           <LevelButton checked={name == level} onClick={() => {
             setTheme(themes[name])
@@ -114,6 +115,24 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
           : <QuizRangeButton active={index == -1}  onClick={() => setCustom(true)}>Custom</QuizRangeButton>
         }
       </div>
+    </>
+  }
+
+  function ExpandButton() {
+    return <button className='m-2 font-bold select-none' onClick={() => setExpanded(!expanded)}>
+      { expanded ? "一" : "三" }
+    </button>
+  }
+
+  return (
+    <div
+      className='h-screen border-r-2 border-r-highlight me-2 overflow-clip transition-all'
+      style={{
+        width: expanded ? 230 : 34
+      }}
+    >
+      <ExpandButton />
+      { expanded ? <PanelContent /> : null }
     </div>
   )
 }
