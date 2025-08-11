@@ -1,6 +1,5 @@
 import { useEffect, useState, KeyboardEvent, useContext } from 'react'
 import jlpt from './jlpt'
-import QuizScreen from './QuizScreen/QuizScreen'
 import { useTheme, ThemeProvider, themes, themeNeutral, Theme, applyTheme } from './theme'
 import { Toggle } from './common/Toggle'
 import { LangContext } from './Utils'
@@ -9,6 +8,8 @@ import groups from './assets/groups.json'
 import Tile from './common/Tile'
 import { useQueryParam, QueryParamProvider } from 'use-query-params';
 import { WindowHistoryAdapter } from 'use-query-params/adapters/window'
+import PairQuizScreen from './QuizScreen/PairQuizScreen'
+import QuizScreen from './QuizScreen/QuizScreen'
 
 
 function LevelButton({ variant, onClick, children, checked }: { variant: 'left' | 'right' | 'normal', onClick: () => void, children: any, checked: boolean }) {
@@ -30,12 +31,16 @@ function LevelButton({ variant, onClick, children, checked }: { variant: 'left' 
 function QuizRangeButton({ onClick, children, active}: {onClick?: () => void, children: any, active: boolean}) {
   return (
     <button
-      className={`m-1 p-1 w-40 border-2 rounded bg-n-accent hover:bg-n-highlight ${active ? "border-highlight" : "border-n-highlight"}`}
+      className={`m-1 p-1 w-1/2 border-2 rounded bg-n-accent hover:bg-n-highlight ${active ? "border-highlight" : "border-n-highlight"}`}
       onClick={onClick}
     >
       {children}
     </button>
   )
+}
+
+enum QuizType {
+  Pairs, List
 }
 
 interface ListScreenProps {
@@ -45,9 +50,10 @@ interface ListScreenProps {
   setLevel: (x: Route) => void
   setLang: (l: Lang) => void
   index?: number
+  quizType?: QuizType
 }
 
-function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListScreenProps) {
+function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizType }: ListScreenProps) {
   const allLevels: Level[] = ["N5", "N4", "N3", "N2", "N1"]
   const kanjiRange = level in jlpt ? jlpt[level as Level] : []
   const [custom, setCustom] = useState(false)
@@ -63,6 +69,13 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
   const lang = useContext(LangContext)
   const langActive = "text-highlight"
   const langInactive = ""
+
+  function quizButtons(a: number, b: number, onSelect: (t: QuizType) => void) {
+    return <div className='flex w-full text-nowrap'>
+      <QuizRangeButton active={a == index && quizType == QuizType.Pairs} onClick={() => onSelect(QuizType.Pairs)}>P {a+1}-{b}</QuizRangeButton>
+      <QuizRangeButton active={a == index && quizType == QuizType.List} onClick={() => onSelect(QuizType.List)}>L {a+1}-{b}</QuizRangeButton>
+    </div>
+  }
 
   function PanelContent() {
     return <>
@@ -89,11 +102,16 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
           <a className={lang == 'en' ? langActive : langInactive} >EN</a>
         </div>
         {
-          ranges.map(([a, b]) =>
-            <QuizRangeButton active={a == index} onClick={() => setQuiz({
-              kanji: kanjiRange.slice(a, b),
-              index: a
-            })}>{a+1}-{b}</QuizRangeButton>
+          ranges.map(([a, b]) => quizButtons(a, b,
+              t => {
+                setQuiz({
+                  kanji: kanjiRange.slice(a, b),
+                  index: a,
+                  type: t
+                })
+                setExpanded(false)
+              }
+            )
           )
         }
         { custom
@@ -107,7 +125,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
               const jlptKanji = Object.values<Kanji[]>(jlpt).reduce((x, y) => x.concat(y))
               const kanji = Array.from(new Set(chars.map(c => jlptKanji.find(k => k.char == c) as Kanji).filter(x => x)))
               if (kanji.length > 0) {
-                setQuiz({ kanji, index: -1 })
+                setQuiz({ kanji, index: -1, type: QuizType.List })
               }
               setCustom(false)
             }
@@ -140,6 +158,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index }: ListS
 type QuizParams = {
   kanji: Kanji[]
   index?: number
+  type: QuizType
 }
 
 const levelsMap = Object.fromEntries(
@@ -206,11 +225,14 @@ function Content() {
             setLevel={setLevel}
             setLang={setLang}
             index={quizParams?.index}
+            quizType={quizParams?.type}
           />
           <div className='w-full min-w-0'>
             { quizParams == null
-            ? level == "groups" ? <GroupsScreen /> : <ListScreen level={level} />
-            : <QuizScreen level={level as Level} kanjiRange={quizParams.kanji}/>
+              ? level == "groups" ? <GroupsScreen /> : <ListScreen level={level} />
+              : quizParams.type == QuizType.Pairs
+                ? <PairQuizScreen level={level as Level} kanjiRange={quizParams.kanji}/>
+                : <QuizScreen level={level as Level} kanjiRange={quizParams.kanji}/>
             }
           </div>
         </div>

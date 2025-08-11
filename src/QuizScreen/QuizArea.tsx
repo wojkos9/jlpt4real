@@ -2,10 +2,9 @@ import { useState, useEffect, useMemo, memo, KeyboardEvent, useContext } from "r
 import KanjiCard from "../common/KanjiCard"
 import Tile from "../common/Tile"
 import Inputs, { InputData } from "./Inputs"
-import { getMeaning } from "./QuizScreen"
 import krad from '../assets/kradfile.json'
 import jlpt from '../jlpt'
-import { LangContext, allRom, getOn, rotArray } from "../Utils"
+import { LangContext, allOnReadings, rotArray } from "../Utils"
 import { Toggle } from "../common/Toggle"
 import groups from '../assets/groups.json'
 
@@ -22,7 +21,7 @@ interface QuizAreaProps {
   level: Level
 }
 
-function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal, level }: QuizAreaProps) {
+function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal }: QuizAreaProps) {
   const [radicals, setRadicals] = useState<string[]>([])
   const [similar, setSimilar] = useState<JLPTKanji[]>([])
   const [hintKanji, setHintKanji] = useState<Kanji | null>(null)
@@ -57,9 +56,11 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal, level }:
 
   const lang = useContext(LangContext)
 
+
+
   const data: InputData[] = useMemo(() => [
-    { options: getMeaning(kanji, lang), width: "8rem", autosuggestion: 2,  },
-    { options: allRom(getOn(kanji)), width: "4rem" }
+    // { options: getMeaning(kanji, lang), width: "8rem", autosuggestion: 2,  },
+    { options: allOnReadings(kanji), width: "4rem" }
   ], [kanji, lang])
 
   function nextSimilar(dir: 1 | -1) {
@@ -113,17 +114,7 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal, level }:
 
   function Similars() {
     const elems = []
-    let isBefore = true
-    const kIndex = jlpt[level].findIndex(k => k.char == kanji.char)
-    const sep = <div className="w-2 h-2 bg-highlight"/>
     for (const s of similar) {
-      if (isBefore && s.level[1] <= level[1]) {
-        const sIndex = jlpt[level].findIndex(k => k.char == s.char)
-        if (s.level[1] < level[1] || sIndex > kIndex) {
-          elems.push(sep)
-          isBefore = false
-        }
-      }
       elems.push(
         <Tile
           size={10}
@@ -132,9 +123,6 @@ function QuizArea({ kanji, nextKanji, shuffle, handleKey, updateReveal, level }:
           level={s.level}
           className="border-4" />
       )
-    }
-    if (isBefore && elems.length > 0) {
-      elems.push(sep)
     }
     return elems
   }

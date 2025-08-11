@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, KeyboardEvent, useContext } f
 import { useTheme } from '../theme'
 import { ArrowsRightLeftIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import trans from '../assets/trans.json'
-import { allRom, getOn, LangContext, rotArray, splitBy } from '../Utils'
+import { toRomaji, getOn, LangContext, rotArray, splitBy } from '../Utils'
 import QuizArea from './QuizArea'
 
 type QuizScreenProps = {
@@ -18,7 +18,7 @@ interface QuizRowProps {
 }
 
 function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
-  const roms = allRom(getOn(k), "hepburn")
+  const roms = toRomaji(getOn(k), "hepburn")
   const theme = useTheme()
   const activeStyle: React.CSSProperties = {
     borderColor: theme.highlight

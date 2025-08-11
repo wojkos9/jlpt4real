@@ -43,8 +43,7 @@ function Inputs({ data, onComplete }: InputsProps) {
   }, [completed])
 
   useEffect(() => {
-    refs[0].current!.value = ""
-    refs[1].current!.value = ""
+    refs.forEach(ref => ref.current!.value = "")
     setCompleted(data.map(() => false))
     refs[0].current!.focus()
   }, [data])

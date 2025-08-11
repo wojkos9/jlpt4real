@@ -13,11 +13,13 @@
     "@callstack/react-theme-provider": "^3.0.9",
     "@heroicons/react": "^2.1.3",
     "kuroshiro": "^1.2.0",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "use-query-params": "^2.2.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.20",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@typescript-eslint/eslint-plugin": "^7.2.0",

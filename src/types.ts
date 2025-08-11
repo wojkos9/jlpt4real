@@ -26,6 +26,7 @@ declare module 'kuroshiro' {
   export type System = "nippon" | "passport" | "hepburn"
   interface Util {
     kanaToRomaji: (kana: string, system: System) => string
+    kanaToHiragna: (kana: string) => string
   }
   const Kuroshiro: {
     Util: Util

@@ -31,8 +31,14 @@ function unique<T>(x: T[]): T[] {
   return Array.from(new Set(x))
 }
 
-export function allRom(readings: string[], system?: System) {
+export function toRomaji(readings: string[], system?: System) {
   return readings.map(o => unique(rom(o, system))).reduce((x, y) => x.concat(y), [])
+}
+
+export function allOnReadings(k: Kanji): string[] {
+  return k.on.map(on => Kuroshiro.Util.kanaToHiragna(on))
+    .concat(k.on)
+    .concat(toRomaji(k.on))
 }
 
 export function getOn(k: Kanji) {
