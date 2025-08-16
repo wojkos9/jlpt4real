@@ -10,6 +10,8 @@ import { useQueryParam, QueryParamProvider } from 'use-query-params';
 import { WindowHistoryAdapter } from 'use-query-params/adapters/window'
 import PairQuizScreen from './QuizScreen/PairQuizScreen'
 import QuizScreen from './QuizScreen/QuizScreen'
+import wordsN3 from './assets/n3_words.json'
+import wordsN2 from './assets/n2_words.json'
 
 
 function LevelButton({ variant, onClick, children, checked }: { variant: 'left' | 'right' | 'normal', onClick: () => void, children: any, checked: boolean }) {
@@ -31,7 +33,7 @@ function LevelButton({ variant, onClick, children, checked }: { variant: 'left' 
 function QuizRangeButton({ onClick, children, active}: {onClick?: () => void, children: any, active: boolean}) {
   return (
     <button
-      className={`m-1 p-1 w-1/2 border-2 rounded bg-n-accent hover:bg-n-highlight ${active ? "border-highlight" : "border-n-highlight"}`}
+      className={`m-1 p-1 flex-grow border-2 rounded bg-n-accent hover:bg-n-highlight ${active ? "border-highlight" : "border-n-highlight"}`}
       onClick={onClick}
     >
       {children}
@@ -66,6 +68,12 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
     ranges.push([i, next])
   }
 
+  const wordCategories = level == "N3"
+    ? Object.entries(wordsN3)
+    : level == "N2"
+      ? Object.entries(wordsN2)
+      : []
+
   const lang = useContext(LangContext)
   const langActive = "text-highlight"
   const langInactive = ""
@@ -75,6 +83,12 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
       <QuizRangeButton active={a == index && quizType == QuizType.Pairs} onClick={() => onSelect(QuizType.Pairs)}>P {a+1}-{b}</QuizRangeButton>
       <QuizRangeButton active={a == index && quizType == QuizType.List} onClick={() => onSelect(QuizType.List)}>L {a+1}-{b}</QuizRangeButton>
     </div>
+  }
+
+  function withPitch(kanaList: string[]) {
+    return kanaList.map((kana, i) =>
+      <a className={i % 2 == 1 ? "border-t-[1px] border-gray-500 break-keep" : "pt-[1px]"} >{kana}</a>
+    )
   }
 
   function PanelContent() {
@@ -114,6 +128,31 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
             )
           )
         }
+        <div className='w-full flex flex-col'>
+          {
+            wordCategories.map(([cat, words]) =>
+              <QuizRangeButton
+                active={false}
+                onClick={() => {
+                  setQuiz({
+                    kanji: [],
+                    pairs: words.map(w => [
+                      w.meaning,
+                      <div className='flex flex-col gap-1'>
+                        <span>{w.kanji}</span>
+                        <span className='text-sm text-gray-500'>{withPitch(w.kana)}</span>
+                      </div> as any as string
+                    ]),
+                    type: QuizType.Pairs
+                  })
+                  setExpanded(false)
+                }}
+              >
+                {cat}
+              </QuizRangeButton>
+            )
+          }
+        </div>
         { custom
           ? <textarea
             className='bg-surface border-2 border-highlight overflow-hidden focus:outline-none'
@@ -144,7 +183,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
 
   return (
     <div
-      className='z-10 bg-surface h-screen absolute border-r-2 border-r-highlight me-2 overflow-clip transition-all'
+      className='z-10 bg-surface shadow-xl shadow-black h-screen absolute border-r-2 border-r-highlight me-2 overflow-clip transition-all'
       style={{
         width: expanded ? 230 : 34
       }}
@@ -157,6 +196,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
 
 type QuizParams = {
   kanji: Kanji[]
+  pairs?: [string, string][]
   index?: number
   type: QuizType
 }
@@ -231,7 +271,7 @@ function Content() {
             { quizParams == null
               ? level == "groups" ? <GroupsScreen /> : <ListScreen level={level} />
               : quizParams.type == QuizType.Pairs
-                ? <PairQuizScreen level={level as Level} kanjiRange={quizParams.kanji}/>
+                ? <PairQuizScreen level={level as Level} kanjiRange={quizParams.kanji} customPairs={quizParams.pairs}/>
                 : <QuizScreen level={level as Level} kanjiRange={quizParams.kanji}/>
             }
           </div>
