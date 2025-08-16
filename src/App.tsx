@@ -137,14 +137,14 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
   }
 
   function ExpandButton() {
-    return <button className='m-2 font-bold select-none' onClick={() => setExpanded(!expanded)}>
+    return <button className='text-xl p-1 font-bold select-none font-[KanjiChart]' onClick={() => setExpanded(!expanded)}>
       { expanded ? "一" : "三" }
     </button>
   }
 
   return (
     <div
-      className='h-screen border-r-2 border-r-highlight me-2 overflow-clip transition-all'
+      className='z-10 bg-surface h-screen absolute border-r-2 border-r-highlight me-2 overflow-clip transition-all'
       style={{
         width: expanded ? 230 : 34
       }}
@@ -227,7 +227,7 @@ function Content() {
             index={quizParams?.index}
             quizType={quizParams?.type}
           />
-          <div className='w-full min-w-0'>
+          <div className='w-full min-w-0 ps-10'>
             { quizParams == null
               ? level == "groups" ? <GroupsScreen /> : <ListScreen level={level} />
               : quizParams.type == QuizType.Pairs
