@@ -5,13 +5,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   disabled?: boolean
 }
 
-function Button({ children, className, selected, disabled, ...props }: ButtonProps) {
+function Button({ children, className, selected, ...props }: ButtonProps) {
   return (
     <button
-      className={`m-2 px-4 py-2 border-2 rounded bg-n-accent hover:bg-n-highlight active:border-highlight active:bg-highlight ${selected ? "border-highlight" : "border-n-highlight"} ${className}`}
-      style={{
-        opacity: disabled ? 0.5 : 1
-      }}
+      className={`m-2 px-4 py-2 border-2 rounded bg-n-accent hover:bg-n-highlight active:border-highlight disabled:opacity-50 active:bg-highlight ${selected ? "border-highlight" : "border-n-highlight"} ${className}`}
       {...props}
     >
       {children}

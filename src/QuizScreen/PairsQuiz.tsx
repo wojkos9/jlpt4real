@@ -16,16 +16,14 @@ function PairsButton({
   children,
   className,
   selected,
-  disabled,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & PairsButtonProps) {
   const theme = useTheme();
   return (
     <button
-      className={`border-2 text-xl rounded-xl border-highlight px-4 py-8 my-2 ${className}`}
+      className={`border-2 text-xl rounded-xl border-highlight disabled:opacity-50 px-4 py-8 my-2 ${className}`}
       style={{
-        backgroundColor: selected ? theme.highlight : undefined,
-        opacity: disabled ? 0.5 : undefined,
+        backgroundColor: selected ? theme.highlight : undefined
       }}
       {...props}
     >

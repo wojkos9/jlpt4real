@@ -18,10 +18,10 @@ export function getMeaning(k: Kanji, lang: Lang, single: boolean = false) {
 
 
 export default function PairQuizScreen({ kanjiRange }: QuizScreenProps) {
-  const [kanjis, setKanjis] = useState(kanjiRange)
+  const kanjis = kanjiRange
   const [start, setStart] = useState(0)
 
-  useEffect(() => setKanjis(kanjiRange), [kanjiRange])
+  useEffect(() => setStart(0), [kanjiRange])
 
   function getTranslation(k: Kanji) {
     const transList = k.meaning // trans[k.char as keyof typeof trans]
@@ -39,17 +39,19 @@ export default function PairQuizScreen({ kanjiRange }: QuizScreenProps) {
     setStart(s => Math.max(s - PAGE_SIZE, 0))
   }
 
+  const end = Math.min(start + PAGE_SIZE, kanjis.length)
+
   return (
     <div className='h-screen flex flex-col items-center justify-center bg-surface'>
       <PairsQuiz
-        pairs={kanjis.slice(start, Math.min(start + PAGE_SIZE, kanjis.length)).map(k => ([k.char, k.on[0] + " " + getTranslation(k)]))}
+        pairs={kanjis.slice(start, end).map(k => ([k.char, k.on[0] + " " + getTranslation(k)]))}
         onComplete={nextPage}
         />
       <div className='w-60 flex items-center justify-between'>
         <Button disabled={start == 0} onClick={prevPage}>
           <ChevronLeftIcon className="size-6" />
         </Button>
-        <span className='font-[KanjiChart]'>{start+1}-{start+PAGE_SIZE}/{kanjis.length}</span>
+        <span className='font-[KanjiChart]'>{start+1}-{end}/{kanjis.length}</span>
         <Button disabled={kanjis.length - start <= PAGE_SIZE} onClick={nextPage}>
           <ChevronRightIcon className="size-6" />
         </Button>
