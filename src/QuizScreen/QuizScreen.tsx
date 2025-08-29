@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback, KeyboardEvent, useContext } from 'react'
 import { useTheme } from '../theme'
 import { ArrowsRightLeftIcon, XMarkIcon } from '@heroicons/react/24/solid'
-import trans from '../assets/trans.json'
 import { toRomaji, getOn, LangContext, rotArray, splitBy } from '../Utils'
 import QuizArea from './QuizArea'
 
@@ -36,7 +35,7 @@ function QuizRow({ kanji: k, onClick, solved, active }: QuizRowProps) {
 }
 
 export function getMeaning(k: Kanji, lang: Lang, single: boolean = false) {
-  return lang == "pl" ? trans[k.char as keyof typeof trans].slice(0, single ? 1 : undefined)
+  return lang == "pl" ? k.meaning.slice(0, single ? 1 : undefined)
     : k.meaning // + " " + k.meaning]
   //: (single ? [meaning[k.char as any as keyof typeof meaning]] : k.meaning)
 }

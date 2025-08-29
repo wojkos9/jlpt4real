@@ -61,7 +61,7 @@ export default function KanjiCard({ kanji, onlyMeta, comp }: { kanji: Kanji, onl
           <div>{kanji.kun.join(", ")}</div>
         </div>
         <div className='text-xs my-1'>
-          { cangjie[kanji.char][0].toUpperCase() }
+          { cangjie[kanji.char].toUpperCase() }
         </div>
         <div className='border-2 rounded p-1 border-highlight'>
           <div className='text-xs font-bold'>Compounds</div>

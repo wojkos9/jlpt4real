@@ -1,7 +1,5 @@
-import _cangjie from './assets/cangjie.json'
+import cangjie from './assets/cangjie.json'
 
-type Cangjie = {[k: string]: string[]}
+type Cangjie = {[k: string]: string}
 
-const cangjie: Cangjie = _cangjie
-
-export default cangjie
+export default cangjie as Cangjie
