@@ -3,7 +3,7 @@ import jlpt from '../jlpt'
 import { themeNeutral, themes } from '../theme'
 import { getMeaning } from '../QuizScreen/QuizScreen'
 import { LangContext } from '../Utils'
-import cangjie from '../cangjie'
+import cangjie, { cangjieToRadicals } from '../cangjie'
 
 function getLevel(k: string) {
   const lvls: Level[] = ["N5", "N4", "N3", "N2", "N1"]
@@ -47,6 +47,7 @@ type Compound2 = {
 
 export default function KanjiCard({ kanji, onlyMeta, comp }: { kanji: Kanji, onlyMeta?: boolean, comp?: Compound2 }) {
   const lang = useContext(LangContext)
+  const cangjieCode = cangjie[kanji.char].toUpperCase()
     return (
       <div className='px-4'>
         <div className='text-xl m-1'>{getMeaning(kanji, lang).join(", ")}</div>
@@ -61,7 +62,7 @@ export default function KanjiCard({ kanji, onlyMeta, comp }: { kanji: Kanji, onl
           <div>{kanji.kun.join(", ")}</div>
         </div>
         <div className='text-xs my-1'>
-          { cangjie[kanji.char].toUpperCase() }
+          { `Cangjie: ${cangjieToRadicals(cangjieCode)} ${cangjieCode}` }
         </div>
         <div className='border-2 rounded p-1 border-highlight'>
           <div className='text-xs font-bold'>Compounds</div>
