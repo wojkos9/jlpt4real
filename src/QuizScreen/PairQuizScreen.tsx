@@ -22,7 +22,7 @@ export function getMeaning(k: Kanji, lang: Lang, single: boolean = false) {
 export default function PairQuizScreen({ kanjiRange, customPairs }: QuizScreenProps) {
   const [start, setStart] = useState(0)
   const pairs = customPairs
-    ?? kanjiRange.map(k => ([k.char + " " + Kuroshiro.Util.kanaToHiragna(k.on[0]), k.rtk]))
+    ?? kanjiRange.map(k => ([k.char + " " + Kuroshiro.Util.kanaToHiragna(k.on[0]), k.wk]))
 
 
   useEffect(() => setStart(0), [kanjiRange])

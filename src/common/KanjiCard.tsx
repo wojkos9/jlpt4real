@@ -48,9 +48,13 @@ type Compound2 = {
 export default function KanjiCard({ kanji, onlyMeta, comp }: { kanji: Kanji, onlyMeta?: boolean, comp?: Compound2 }) {
   const lang = useContext(LangContext)
   const cangjieCode = cangjie[kanji.char].toUpperCase()
+  const [mainMeaning, ...meanings] = getMeaning(kanji, lang).slice(0, 3)
     return (
       <div className='px-4'>
-        <div className='text-xl m-1'>{getMeaning(kanji, lang).join(", ")}</div>
+        <div className='text-xl m-1'>
+          <span className='font-bold'>{mainMeaning}</span>
+          <span className='opacity-50'> {meanings.join(", ")}</span>
+        </div>
         { !onlyMeta &&
         <div className='text-8xl text-center font-[KanjiChart] bg-accent'>{kanji.char}</div>
         }
