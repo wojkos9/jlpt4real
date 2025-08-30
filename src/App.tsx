@@ -257,7 +257,7 @@ function Content() {
   return (
     <ThemeProvider theme={theme}>
       <LangContext.Provider value={lang}>
-        <div className='flex h-screen bg-surface overflow-x-scroll'>
+        <div className='flex h-screen bg-surface overflow-x-scroll no-scrollbar'>
           <LeftPanel
             setTheme={setThemePartial}
             setQuiz={setQuizParams}

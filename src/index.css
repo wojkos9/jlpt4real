@@ -18,3 +18,13 @@ body {
   font-family: KanjiChart;
   src: url("/font/thick-round-gothic.woff2");
 }
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
