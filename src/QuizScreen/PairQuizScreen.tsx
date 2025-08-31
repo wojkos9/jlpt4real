@@ -36,7 +36,9 @@ export default function PairQuizScreen({ kanjiRange, customPairs }: QuizScreenPr
   const PAGE_SIZE = 5
 
   function nextPage() {
-    setStart(s => Math.min(s + PAGE_SIZE, pairs.length - 1))
+    if (start + PAGE_SIZE < pairs.length) {
+      setStart(s => s + PAGE_SIZE)
+    }
   }
 
   function prevPage() {
@@ -44,6 +46,8 @@ export default function PairQuizScreen({ kanjiRange, customPairs }: QuizScreenPr
   }
 
   const end = Math.min(start + PAGE_SIZE, pairs.length)
+  const currentPage = Math.floor(start / PAGE_SIZE) + 1
+  const numPages = Math.ceil(pairs.length / PAGE_SIZE)
 
   return (
     <div className='h-full py-4 flex flex-col items-center justify-center bg-surface'>
@@ -55,7 +59,7 @@ export default function PairQuizScreen({ kanjiRange, customPairs }: QuizScreenPr
         <Button disabled={start == 0} onClick={prevPage}>
           <ChevronLeftIcon className="size-6" />
         </Button>
-        <span className='font-[KanjiChart]'>{start+1}-{end}/{pairs.length}</span>
+        <span className='font-[KanjiChart]'>{currentPage}/{numPages}</span>
         <Button disabled={pairs.length - start <= PAGE_SIZE} onClick={nextPage}>
           <ChevronRightIcon className="size-6" />
         </Button>
