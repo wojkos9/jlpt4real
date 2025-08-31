@@ -14,9 +14,10 @@ function KanjiGrid({level, setKanji, currentKanji, isQuiz}: KanjiGridProps) {
   const data = jlpt[level]
   for (let i = 0; i < data.length; i += ROW_LENGTH) {
     rows.push(
-      <div className={`${isQuiz ? 'hover:bg-gray-300 cursor-pointer' : ''}`}>
+      <div key={i} className={`${isQuiz ? 'hover:bg-gray-300 cursor-pointer' : ''}`}>
         {data.slice(i, i + ROW_LENGTH).map((k, j) =>
           <Tile
+            key={k.char}
             size={12}
             className="m-[2px]"
             kanji={k.char}

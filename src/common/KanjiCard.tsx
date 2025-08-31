@@ -26,7 +26,7 @@ function KanjiCompound({ compound }: {compound: Compound}) {
       }
 
       kanji.push(
-        <a className='rounded me-px' style={{backgroundColor: col}}>{k}</a>
+        <a key={k} className='rounded me-px' style={{backgroundColor: col}}>{k}</a>
       )
     }
     return (
@@ -70,7 +70,7 @@ export default function KanjiCard({ kanji, onlyMeta, comp }: { kanji: Kanji, onl
         </div>
         <div className='border-2 rounded p-1 border-highlight'>
           <div className='text-xs font-bold'>Compounds</div>
-          {kanji.compound.map(c => <KanjiCompound compound={c}/>)}
+          {kanji.compound.map((c, i) => <KanjiCompound key={i} compound={c}/>)}
         </div>
       </div>
     )

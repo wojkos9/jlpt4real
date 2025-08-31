@@ -79,7 +79,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
   const langInactive = ""
 
   function quizButtons(a: number, b: number, onSelect: (t: QuizType) => void) {
-    return <div className='flex w-full text-nowrap'>
+    return <div key={a} className='flex w-full text-nowrap'>
       <QuizRangeButton active={a == index && quizType == QuizType.Pairs} onClick={() => onSelect(QuizType.Pairs)}>P {a+1}-{b}</QuizRangeButton>
       <QuizRangeButton active={a == index && quizType == QuizType.List} onClick={() => onSelect(QuizType.List)}>L {a+1}-{b}</QuizRangeButton>
     </div>
@@ -96,7 +96,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
       <div className='text-center text-sm m-1 font-bold'>Level</div>
       <div className='flex justify-center flex-nowrap mx-2'>
         {allLevels.map((name, i) => (
-          <LevelButton checked={name == level} onClick={() => {
+          <LevelButton key={name} checked={name == level} onClick={() => {
             setTheme(themes[name])
             setLevel(name)
             setQuiz(null)
@@ -132,6 +132,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
           {
             wordCategories.map(([cat, words]) =>
               <QuizRangeButton
+                key={cat}
                 active={false}
                 onClick={() => {
                   setQuiz({

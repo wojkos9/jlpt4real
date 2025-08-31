@@ -27,7 +27,6 @@ function ListScreen({level}: {level: Level}) {
       className='flex flex-col h-screen'
       tabIndex={0}
       onKeyDown={e => {
-        console.log(e)
         const dirs: {[key: string]: number | null} = {
           "ArrowRight": 1,
           "ArrowLeft": -1,
