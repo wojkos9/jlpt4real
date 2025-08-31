@@ -21,7 +21,7 @@ function PairsButton({
   const theme = useTheme();
   return (
     <button
-      className={`border-2 bg-surface rounded-xl shadow-md shadow-black border-accent disabled:opacity-50 px-2 py-4 ${className}`}
+      className={`border-2 bg-surface rounded-xl shadow-md shadow-black border-accent active:bg-highlight disabled:opacity-50 px-2 py-4 ${className}`}
       style={{
         backgroundColor: selected ? theme.highlight : undefined,
         borderColor: selected ? theme.highlight: undefined
@@ -36,28 +36,32 @@ function PairsButton({
 function PairsQuiz({ pairs, onComplete }: PairsQuizProps) {
   const [selected, setSelected] = useState<{ [col: number]: number }>({});
   const [solved, setSolved] = useState<number[][]>(pairs[0].map(_ => []));
+  const arity = pairs[0].length
 
   useEffect(() => {
     setSolved(pairs[0].map(_ => []));
     setSelected({});
-  }, [pairs]);
+  }, [pairs])
 
-  useEffect(() => {
-    var isComplete = false;
-    const answerIds = Object.values(selected)
-    if (answerIds.length == pairs[0].length) {
-      const pair = pairs[answerIds[0]]
-      const answers = answerIds.map((id, i) => pairs[id][i])
-      if (answers.every((a, i) => a == pair[i])) {
-        isComplete = solved[0].length + 1 == pairs.length;
-        setSolved((s) => s.map((col, i) => [...col, answerIds[i]]));
+  function select(colId: number, answerId: number) {
+    const newSelected = { ...selected, [colId]: answerId }
+    const answerIds = Object.values(newSelected)
+    const answers = answerIds.map((id, i) => pairs[id][i])
+    const pair = pairs[answerIds[0]]
+    if (answers.every((a, i) => a == pair[i])) {
+      if (answerIds.length == arity) {
+        setSelected({})
+        setSolved((s) => s.map((col, i) => [...col, answerIds[i]]))
+        if (solved[0].length + 1 == pairs.length) {
+          onComplete()
+        }
+      } else {
+        setSelected(newSelected)
       }
-      setSelected({});
-      if (isComplete) {
-        onComplete();
-      }
+    } else {
+      setSelected({})
     }
-  }, [selected]);
+  }
 
   const shuffled = useMemo(() => _.zip(
     ..._.unzip(pairs).map(col => _.shuffle(col.map((p, i) => [p, i])))
@@ -72,7 +76,7 @@ function PairsQuiz({ pairs, onComplete }: PairsQuizProps) {
               className="font-[KanjiChart] flex-grow basis-1"
               disabled={solved[colId].includes(id)}
               selected={id == selected[colId]}
-              onClick={() => setSelected((s) => ({ ...s, [colId]: id }))}
+              onClick={() => select(colId, id)}
             >
               {text}
             </PairsButton>
