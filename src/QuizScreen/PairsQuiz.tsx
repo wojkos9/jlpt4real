@@ -67,14 +67,14 @@ function PairsQuiz({ pairs, onComplete }: PairsQuizProps) {
   ), [pairs]) as [string, number][][]
 
   return (
-    <div className="flex flex-col h-full py-8 px-4 w-full gap-4">
+    <div className="flex flex-col h-full py-8 w-full gap-4">
       {shuffled.map((pair, colId) => (
         <div key={colId} className="flex flex-grow w-full gap-4 basis-1">
           {pair.map(([text, id], colId) => (
             <PairsButton
               key={`${colId}-${id}`}
               className="font-[KanjiChart] flex-grow basis-1"
-              disabled={solved[colId].includes(id)}
+              disabled={solved[colId]?.includes(id)}
               selected={id == selected[colId]}
               onClick={() => select(colId, id)}
             >
