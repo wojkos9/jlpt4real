@@ -12,6 +12,7 @@ import PairQuizScreen from './QuizScreen/PairQuizScreen'
 import QuizScreen from './QuizScreen/QuizScreen'
 import wordsN3 from './assets/n3_words.json'
 import wordsN2 from './assets/n2_words.json'
+import useLocalStorage from './common/useLocalStorage'
 
 
 function LevelButton({ variant, onClick, children, checked }: { variant: 'left' | 'right' | 'normal', onClick: () => void, children: any, checked: boolean }) {
@@ -234,7 +235,8 @@ function GroupsScreen() {
 type Route = Level | "groups"
 
 function Content() {
-  const [level = "N5", setLevel] = useQueryParam<Route>("level")
+  const [savedLevel, saveLevel] = useLocalStorage<Level>("currentLevel", "N5")
+  const [level = savedLevel, setLevel] = useQueryParam<Route>("level")
   const [theme, setTheme] = useState({...themeNeutral, ...themes[level as Level]})
   const [quizParams, setQuizParams] = useState<QuizParams | null>(null)
   const [lang, setLang] = useState<Lang>("en")
@@ -244,6 +246,7 @@ function Content() {
       document.title = "JLPT Kanji groups"
     } else {
       document.title = `JLPT Study ${level}`
+      saveLevel(level)
     }
   }, [level])
 
