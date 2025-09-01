@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import trans from '../assets/trans.json'
 import PairsQuiz from './PairsQuiz'
 import Button from '../common/Button'
@@ -20,20 +20,18 @@ export function getMeaning(k: Kanji, lang: Lang, single: boolean = false) {
 
 
 export default function PairQuizScreen({ kanjiRange, customPairs }: QuizScreenProps) {
-  const [start, setStart] = useState(0)
-  const pairs = customPairs
-    ?? kanjiRange.map(k => ([k.char, Kuroshiro.Util.kanaToHiragna(k.on[0]), k.wk]))
-
-
-  useEffect(() => setStart(0), [kanjiRange])
-
-  // function getTranslation(k: Kanji) {
-  //   const transList = k.meaning // trans[k.char as keyof typeof trans]
-  //   const selected = transList.slice(0, Math.min(2, transList.length))
-  //   return selected.join(", ")
-  // }
-
   const PAGE_SIZE = 5
+  const [start, setStart] = useState(0)
+  const [range, setRange] = useState(kanjiRange)
+  const pairs = customPairs ?? kanjiRange.map(k => ([k.char, Kuroshiro.Util.kanaToHiragna(k.on[0]), k.wk]))
+  const end = Math.min(start + PAGE_SIZE, pairs.length)
+  const currentPage = Math.floor(start / PAGE_SIZE) + 1
+  const numPages = Math.ceil(pairs.length / PAGE_SIZE)
+
+  if (kanjiRange !== range) {
+    setStart(0)
+    setRange(kanjiRange)
+  }
 
   function nextPage() {
     if (start + PAGE_SIZE < pairs.length) {
@@ -44,10 +42,6 @@ export default function PairQuizScreen({ kanjiRange, customPairs }: QuizScreenPr
   function prevPage() {
     setStart(s => Math.max(s - PAGE_SIZE, 0))
   }
-
-  const end = Math.min(start + PAGE_SIZE, pairs.length)
-  const currentPage = Math.floor(start / PAGE_SIZE) + 1
-  const numPages = Math.ceil(pairs.length / PAGE_SIZE)
 
   return (
     <div className='h-full py-4 flex flex-col items-center justify-center bg-surface'>

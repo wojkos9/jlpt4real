@@ -36,7 +36,6 @@ function PairsButton({
 function PairsQuiz({ pairs, onComplete }: PairsQuizProps) {
   const [selected, setSelected] = useState<{ [col: number]: number }>({});
   const [solved, setSolved] = useState<number[][]>(pairs[0].map(_ => []));
-  const arity = pairs[0].length
 
   useEffect(() => {
     setSolved(pairs[0].map(_ => []));
@@ -49,7 +48,7 @@ function PairsQuiz({ pairs, onComplete }: PairsQuizProps) {
     const answers = answerIds.map((id, i) => pairs[id][i])
     const pair = pairs[answerIds[0]]
     if (answers.every((a, i) => a == pair[i])) {
-      if (answerIds.length == arity) {
+      if (answerIds.length == pairs[0].length) {
         setSelected({})
         setSolved((s) => s.map((col, i) => [...col, answerIds[i]]))
         if (solved[0].length + 1 == pairs.length) {
