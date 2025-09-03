@@ -10,9 +10,12 @@ import { useQueryParam, QueryParamProvider } from 'use-query-params';
 import { WindowHistoryAdapter } from 'use-query-params/adapters/window'
 import PairQuizScreen from './QuizScreen/PairQuizScreen'
 import QuizScreen from './QuizScreen/QuizScreen'
+import wordsN5 from './assets/n5_words.json'
+import wordsN4 from './assets/n4_words.json'
 import wordsN3 from './assets/n3_words.json'
 import wordsN2 from './assets/n2_words.json'
 import useLocalStorage from './common/useLocalStorage'
+import { QuizOption } from './QuizScreen/PairsQuiz'
 
 
 function LevelButton({ variant, onClick, children, checked }: { variant: 'left' | 'right' | 'normal', onClick: () => void, children: any, checked: boolean }) {
@@ -69,11 +72,14 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
     ranges.push([i, next])
   }
 
-  const wordCategories = level == "N3"
-    ? Object.entries(wordsN3)
-    : level == "N2"
-      ? Object.entries(wordsN2)
-      : []
+  const wordLists = {
+    "N5": wordsN5,
+    "N4": wordsN4,
+    "N3": wordsN3,
+    "N2": wordsN2
+  }
+
+  const wordCategories = level in wordLists ? Object.entries(wordLists[level as keyof typeof wordLists]) : []
 
   const lang = useContext(LangContext)
   const langActive = "text-highlight"
@@ -120,6 +126,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
           ranges.map(([a, b]) => quizButtons(a, b,
               t => {
                 setQuiz({
+                  name: `${level} KANJI ${a}-${b}`,
                   kanji: kanjiRange.slice(a, b),
                   index: a,
                   type: t
@@ -137,13 +144,14 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
                 active={false}
                 onClick={() => {
                   setQuiz({
+                    name: `${level} ${cat.toUpperCase()}`,
                     kanji: [],
                     pairs: words.map(w => [
-                      w.meaning,
-                      <div className='flex flex-col gap-1'>
-                        <span>{w.kanji}</span>
-                        <span className='text-sm text-gray-500'>{withPitch(w.kana)}</span>
-                      </div> as any as string
+                      { text: w.meaning },
+                      {
+                        text: w.kanji,
+                        auxElement: <span className='text-sm text-gray-500'>{withPitch(w.kana)}</span>
+                      }
                     ]),
                     type: QuizType.Pairs
                   })
@@ -166,7 +174,7 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
               const jlptKanji = Object.values<Kanji[]>(jlpt).reduce((x, y) => x.concat(y))
               const kanji = Array.from(new Set(chars.map(c => jlptKanji.find(k => k.char == c) as Kanji).filter(x => x)))
               if (kanji.length > 0) {
-                setQuiz({ kanji, index: -1, type: QuizType.List })
+                setQuiz({ name: "Custom", kanji, index: -1, type: QuizType.List })
               }
               setCustom(false)
             }
@@ -197,8 +205,9 @@ function LeftPanel({ setTheme, setQuiz, level, setLevel, setLang, index, quizTyp
 }
 
 type QuizParams = {
+  name: string
   kanji: Kanji[]
-  pairs?: [string, string][]
+  pairs?: [QuizOption, QuizOption][]
   index?: number
   type: QuizType
 }
@@ -275,7 +284,7 @@ function Content() {
             { quizParams == null
               ? level == "groups" ? <GroupsScreen /> : <ListScreen level={level} />
               : quizParams.type == QuizType.Pairs
-                ? <PairQuizScreen level={level as Level} kanjiRange={quizParams.kanji} customPairs={quizParams.pairs}/>
+                ? <PairQuizScreen quizName={quizParams.name} kanjiRange={quizParams.kanji} customPairs={quizParams.pairs}/>
                 : <QuizScreen level={level as Level} kanjiRange={quizParams.kanji}/>
             }
           </div>

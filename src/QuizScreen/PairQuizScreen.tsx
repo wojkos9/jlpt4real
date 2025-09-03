@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import trans from '../assets/trans.json'
-import PairsQuiz from './PairsQuiz'
+import PairsQuiz, { QuizOption } from './PairsQuiz'
 import Button from '../common/Button'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
 import Kuroshiro from 'kuroshiro'
@@ -8,9 +8,9 @@ import { Toggle } from '../common/Toggle'
 import useLocalStorage from '../common/useLocalStorage'
 
 type QuizScreenProps = {
+  quizName: string
   kanjiRange: Kanji[]
-  customPairs?: string[][]
-  level: Level
+  customPairs?: QuizOption[][]
 }
 
 export function getMeaning(k: Kanji, lang: Lang, single: boolean = false) {
@@ -21,7 +21,7 @@ export function getMeaning(k: Kanji, lang: Lang, single: boolean = false) {
 
 
 
-export default function PairQuizScreen({ kanjiRange, customPairs }: QuizScreenProps) {
+export default function PairQuizScreen({ quizName, kanjiRange, customPairs }: QuizScreenProps) {
   const PAGE_SIZE = 5
   const [start, setStart] = useState(0)
   const [range, setRange] = useState(kanjiRange)
@@ -33,7 +33,7 @@ export default function PairQuizScreen({ kanjiRange, customPairs }: QuizScreenPr
     return [k.char, Kuroshiro.Util.kanaToHiragna(k.on[0]), k.wk]
   }
   const pairs = customPairs
-    ?? kanjiRange.map(k => quizMode == "triple" ? triplePair(k) : doublePair(k))
+    ?? kanjiRange.map(k => quizMode == "triple" ? triplePair(k) : doublePair(k)).map(p => p.map(o => ({ text: o })))
   const end = Math.min(start + PAGE_SIZE, pairs.length)
   const currentPage = Math.floor(start / PAGE_SIZE) + 1
   const numPages = Math.ceil(pairs.length / PAGE_SIZE)
@@ -55,15 +55,19 @@ export default function PairQuizScreen({ kanjiRange, customPairs }: QuizScreenPr
 
   return (
     <div className='h-full p-4 flex flex-col items-center justify-center bg-surface'>
-      <div className='h-40 w-full flex flex-col items-center p-2 bg-accent rounded-md'>
+      <div className='h-40 w-full flex flex-col items-center gap-4 p-2  font-[KanjiChart]'>
+        <div className='font-bold text-xl'>
+         {quizName}
+        </div>
         {
         customPairs ? null
-          : <div className='flex gap-2 text-xl font-[KanjiChart]'>
-              Quiz: double <Toggle on={quizMode == "triple"} onChange={(on) => setQuizMode(on ? "triple" : "double")} /> triple
+          : <div className='flex gap-2 text-lg'>
+              type: double <Toggle on={quizMode == "triple"} onChange={(on) => setQuizMode(on ? "triple" : "double")} /> triple
             </div>
         }
       </div>
       <PairsQuiz
+        name={quizName}
         pairs={pairs.slice(start, end)}
         onComplete={nextPage}
         />
